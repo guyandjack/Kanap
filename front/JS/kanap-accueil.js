@@ -26,12 +26,7 @@ function createLink(i){
 
     newLink = document.createElement("a");
     let idValue = data[i]._id;
-    let prixValue = data[i].price;
-    let descriptionValue = data[i].description;
-    let nameValue = data[i].name;
-    let srcValue = data[i].imageUrl;
-
-    newLink.setAttribute("href", "./product.html?id=" + idValue + "&price=" + prixValue + "&description=" + descriptionValue + "&name=" + nameValue + "&srcImg=" + srcValue);
+    newLink.setAttribute("href", "./product.html?id=" + idValue );
     sectionItems.appendChild(newLink);
  
 }

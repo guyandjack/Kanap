@@ -5,6 +5,11 @@
  **************************************************************************************************************
  **************************************************************************************************************/
 
+//******  constantes globales ********
+
+const apiUrl = "http://localhost:3000/api/products";
+
+
 /****** constantes liées au DOM ***** */
 
 const containerImg = document.querySelector(".item__img");
@@ -22,20 +27,9 @@ function getDataUrl(){
     try{
         let url = window.location.href;
         let urlValue = new URL(url);
-        let srcValue = urlValue.searchParams.get("srcImg");
-        let  nameValue = urlValue.searchParams.get("name");
-        let priceValue = urlValue.searchParams.get("price");
-        let descriptionValue = urlValue.searchParams.get("description");
-        
-        tabResults = {
-            "img" : srcValue,
-            "name" : nameValue,
-            "price" :  priceValue,
-            "description" : descriptionValue,
-            
-        };
-
-        return tabResults
+        idValue = urlValue.searchParams.get("id");
+              
+        return idValue
     }
     catch(e){
 
@@ -44,15 +38,59 @@ function getDataUrl(){
     }
 }
 
+//permet de recuperer les données du produit correspondant à l' id passé dans l' url
+
+function getDataProductById(){
+
+    
+        fetch(apiUrl)
+
+        // Conversion au format Json des données recues de l' API
+        .then (function(res){
+        
+            return res.json() 
+        }
+        )
+        
+        // extrait l' id des produits de l' API et le compare à l' id de l' url de la page courante
+        .then (function(value) {
+
+            data = value;
+            for (let i = 0; i < data.length; i++){
+                
+                if(idValue === data[i]._id){
+                    
+                     imgUrlValue = data[i].imageUrl;
+                     nameValue = data[i].name;
+                     priceValue = data[i].price;
+                     descriptionValue = data[i].description;
+                }
+            }
+
+            
+        }
+        )
+        
+   
+        // Affichage d' une erreur éventuelle dans une fenetre pop up
+        .catch (function(err){
+
+            alert("il s'est produit une erreur: " + err);
+        }
+        );
+
+    
+
+}
+
+
 //crée un élément html "img" avec attribut src et alt dans l' élément "div class=items__img"
 
  function createImg(){
 
     newImg = document.createElement("img");
-    let altValue = "Photographie d'un canapé";
-    let srcValue = tabResults.img;
-    newImg.setAttribute("alt", altValue);
-    newImg.setAttribute("src", srcValue);
+    newImg.setAttribute("alt", "Photographie d'un canapé");
+    newImg.setAttribute("src", imgUrlValue);
     containerImg.appendChild(newImg);
 
 }
@@ -62,9 +100,9 @@ function getDataUrl(){
 function pushData(){
 
     createImg();
-    productName.innerText = tabResults.name;
-    productPrice.innerText = tabResults.price;
-    productDescription.innerText = tabResults.description;
+    productName.innerText = nameValue;
+    productPrice.innerText = priceValue;
+    productDescription.innerText = descriptionValue;
     
    
 }
@@ -74,6 +112,7 @@ function pushData(){
 function displayOneProduct(){
 
     getDataUrl();
+    getDataProductById();
     pushData();
 }
 
