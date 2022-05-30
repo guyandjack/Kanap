@@ -20,7 +20,7 @@ const productDescription = document.getElementById("description");
 
 /***** declaration des fonctions ****** */
 
-// permet de recuperer les données du produit dans l' url 
+// permet de recuperer l'id du produit dans l' url 
 
 function getDataUrl(){
 
@@ -38,86 +38,69 @@ function getDataUrl(){
     }
 }
 
-//permet de recuperer les données du produit correspondant à l' id passé dans l' url
 
-function getDataProductById(){
-
-    
-        fetch(apiUrl)
-
-        // Conversion au format Json des données recues de l' API
-        .then (function(res){
-        
-            return res.json() 
-        }
-        )
-        
-        // extrait l' id des produits de l' API et le compare à l' id de l' url de la page courante
-        .then (function(value) {
-
-            data = value;
-            for (let i = 0; i < data.length; i++){
-                
-                if(idValue === data[i]._id){
-                    
-                     imgUrlValue = data[i].imageUrl;
-                     nameValue = data[i].name;
-                     priceValue = data[i].price;
-                     descriptionValue = data[i].description;
-                }
-            }
-
-            
-        }
-        )
-        
-   
-        // Affichage d' une erreur éventuelle dans une fenetre pop up
-        .catch (function(err){
-
-            alert("il s'est produit une erreur: " + err);
-        }
-        );
-
-    
-
-}
 
 
 //crée un élément html "img" avec attribut src et alt dans l' élément "div class=items__img"
 
- function createImg(){
+ function createImg(arg){
 
     newImg = document.createElement("img");
     newImg.setAttribute("alt", "Photographie d'un canapé");
-    newImg.setAttribute("src", imgUrlValue);
+    newImg.setAttribute("src", arg);
     containerImg.appendChild(newImg);
 
 }
 
 // Implémente les données dans les éléments du DOM
 
-function pushData(){
+function pushData(name,price,desc){
 
-    createImg();
-    productName.innerText = nameValue;
-    productPrice.innerText = priceValue;
-    productDescription.innerText = descriptionValue;
+    
+    productName.innerText = name;
+    productPrice.innerText = price;
+    productDescription.innerText = desc;
     
    
 }
 
 // Fonction principale qui regroupe l' ensemble des fonctions permetant  l' affichage des données correspondant a un produit
 
-function displayOneProduct(){
+function displayDataProductById() {
 
+    // obtient l' id du produit contenu dans l' url de la page courante
     getDataUrl();
-    getDataProductById();
-    pushData();
+  
+    // Accession à l' API via son Url
+
+    fetch(apiUrl)
+
+    // Conversion au format Json des données recues de l' API
+
+    .then(function (res) {
+      return res.json();
+    })
+
+    // extrait l' id des produits de l' API et le compare à l' id de l' url de la page courante
+
+    .then(function (data) {
+      for (let i = 0; i < data.length; i++) {
+        if (idValue == data[i]._id) {
+          createImg(data[i].imageUrl);
+          pushData(data[i].name, data[i].price, data[i].description); //implemente les donnees dans le DOM
+        }
+      }
+    })
+
+    // Affichage d' une erreur éventuelle dans une fenetre pop up
+
+    .catch(function (err) {
+      alert("il s'est produit une erreur: " + err);
+    });
 }
 
 /**************** code principal ***********************/
 
 // fonction principale pour la page product
 
-displayOneProduct();
+displayDataProductById();
