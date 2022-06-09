@@ -5,17 +5,25 @@
  **************************************************************************************************************
  **************************************************************************************************************/
 
-//******  constantes globales ********
 
-const apiUrl = "http://localhost:3000/api/products";
+ /*** constantes liées au DOM ************/
+ const buttonBucket = document.getElementById("addToCart");
 
+ /*** variables de fonctionnement*** */
 
-/****** constantes liées au DOM ***** */
+ // contient la valeur du local storage sous forme d' objet
+ let bucket;
+ 
 
-const containerImg = document.querySelector(".item__img");
-const productName = document.getElementById("title");
-const productPrice = document.getElementById("price");
-const productDescription = document.getElementById("description");
+ if( window.localStorage.getItem("product") != null){
+    
+        
+     bucket = JSON.parse(window.localStorage.getItem("product"));
+    }
+else{
+        
+        bucket = [];
+ }
 
 
 /***** declaration des fonctions ****** */
@@ -43,20 +51,24 @@ function getDataUrl(){
 
 //crée un élément html "img" avec attribut src et alt dans l' élément "div class=items__img"
 
- function createImg(arg){
+ function createImg(arg1, arg2){
 
+    const containerImg = document.querySelector(".item__img");
     newImg = document.createElement("img");
-    newImg.setAttribute("alt", "Photographie d'un canapé");
-    newImg.setAttribute("src", arg);
+    newImg.setAttribute("src", arg1);
+    newImg.setAttribute("alt", arg2);
     containerImg.appendChild(newImg);
 
 }
 
-// Implémente les données dans les éléments du DOM
+// Implémente les données (nom, prix, description)  dans les éléments du DOM
 
-function pushData(name,price,desc){
+function insertDataText(name,price,desc){
 
-    
+    const productName = document.getElementById("title");
+    const productPrice = document.getElementById("price");
+    const productDescription = document.getElementById("description");
+
     productName.innerText = name;
     productPrice.innerText = price;
     productDescription.innerText = desc;
@@ -64,32 +76,50 @@ function pushData(name,price,desc){
    
 }
 
-// Fonction principale qui regroupe l' ensemble des fonctions permetant  l' affichage des données correspondant a un produit
+// Crée les element option dans le DOM  permetant le choix de la couleur par l' utilisateur
+
+function createOption(arg){
+
+    const select = document.getElementById("colors");
+
+    for(color of arg){
+
+        newOption = document.createElement("option");
+        newOption.setAttribute("value", color);
+        newOption.innerText = color;
+        select.appendChild(newOption);
+    }
+
+}
+
+// Fonction principale qui regroupe l' ensemble des fonctions permetant l' affichage des données correspondant au produit selectionné sur page accueil
 
 function displayDataProductById() {
 
     // obtient l' id du produit contenu dans l' url de la page courante
     getDataUrl();
   
-    // Accession à l' API via son Url
-
+    // Requette sur l' API pour obtenir le produit seletionné
+    let apiUrl = "http://localhost:3000/api/products/" + idValue;
     fetch(apiUrl)
 
     // Conversion au format Json des données recues de l' API
 
     .then(function (res) {
-      return res.json();
+        
+        
+        return res.json()
+      
     })
 
-    // extrait l' id des produits de l' API et le compare à l' id de l' url de la page courante
-
+    //implemente les donnees du produit selectionné dans le DOM
     .then(function (data) {
-      for (let i = 0; i < data.length; i++) {
-        if (idValue == data[i]._id) {
-          createImg(data[i].imageUrl);
-          pushData(data[i].name, data[i].price, data[i].description); //implemente les donnees dans le DOM
-        }
-      }
+       
+        createImg(data.imageUrl, data.altTxt);
+        insertDataText(data.name, data.price, data.description);
+        createOption(data.colors) ;
+        
+      
     })
 
     // Affichage d' une erreur éventuelle dans une fenetre pop up
@@ -99,8 +129,98 @@ function displayDataProductById() {
     });
 }
 
+
+// Stokage des informations du produit suite à un click sur le bouton "ajouter au panier"
+
+
+// recupere la quantite defini par l' utilisateur
+function getQuantity(){
+
+    const qtyProducts = document.getElementById("quantity");
+    let qtyProductsValue = parseInt(qtyProducts.value);
+    return qtyProductsValue
+}
+
+// recupere la couleur defini par l' utilisateur
+function getColor(){
+    const colorProduct = document.getElementById("colors");
+    let colorProductValue = colorProduct.value;
+    return colorProductValue
+}
+
+//enregistre les données du panier dans le local storage
+function saveBucketInLocalStorage(arg){
+    window.localStorage.setItem("product",  JSON.stringify(arg));
+}
+
+//Verifie si le nouveau produit existe deja
+function checkNewProductIfAlreadyExist(newProduct, actualBucket){
+    
+    let exist = [false, 0, null];
+
+    for (let i = 0; i < actualBucket.length; i++){
+
+        if (newProduct.id == actualBucket[i].id && newProduct.color == actualBucket[i].color){
+            // Si le produit existe deja on incremente la qte produit dans le panier existant
+            //product.qty += newProduct.qty ;
+            exist = [true, newProduct.qty, i]; 
+            break
+        }
+        
+
+    }
+    
+    return exist
+}
+ 
+
+
+
+// enrgistre les produits, la qte, la couleur dans le panier
+function pushToBucket() {
+
+    // recupere la qte et la couleur choisi par l' utilisateur
+    let qty = getQuantity();
+    let color = getColor();
+    
+    // nouveau produit 
+    let valueToPushInBucket = {
+
+         "id" : idValue,
+         "qty" : qty,
+         "color" : color
+    }
+
+    console.log(bucket)
+    console.log(valueToPushInBucket)
+
+    // verifie si le produit existe deja dans le panier
+    let check = checkNewProductIfAlreadyExist(valueToPushInBucket, bucket);
+    console.log(check)
+    
+    // si le nouveau produit n' existe pas on le rajoute au panier 
+    if(check[0] == false){
+    bucket.push(valueToPushInBucket);
+    }
+    // si il existe on modifie la quqntite correspondant au produit du pannier existant
+    else{
+        bucket[check[2]].qty += check[1];
+    }
+    console.log(bucket)
+    
+
+    saveBucketInLocalStorage(bucket);
+    
+
+
+
+ }
+     
+ 
+
 /**************** code principal ***********************/
 
 // fonction principale pour la page product
 
 displayDataProductById();
+buttonBucket.addEventListener("click", pushToBucket);

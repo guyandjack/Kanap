@@ -96,8 +96,11 @@ function displayProducts(){
 
     // Conversion au format Json des données recues de l' API
     .then (function(res){
-     
-        return res.json() 
+        console.log(res)
+        res2 = res.json();
+        console.log(res2)
+        console.log(res)
+        return res2 
       }
     )
     
