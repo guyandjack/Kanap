@@ -6,93 +6,99 @@
  **************************************************************************************************************
  **************************************************************************************************************/
 
- /*************** partie 1****************************************************************************************/
+/*************** partie 1****************************************************************************************/
 
- /******* constante globales    *****/
+/******* constante globales    *****/
 
- const sectionItems = document.getElementById("cart__items");
- /**** declaration des fonctions *****/
+const sectionItems = document.getElementById("cart__items");
 
- // Requette sur l' API pour obtenir les infos du produit à afficher dans le panier
+/**** declaration des fonctions *****/
 
- function getProductDataFromApi(idValue){
+// Fonction principale qui affiche les produits sur la page panier
 
-    let tabResult ={
-        "prix" : "",
-        "urlimg" : "",
-        "nom" : ""    
-    }
-    
-    let apiUrl = "http://localhost:3000/api/products/" + idValue;
+function displayProductsInCart() {
+  // recuperation du panier dans le local storage
+  let cart = getCartInlocalStorage();
+
+  // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
+
+  for (let product of cart) {
+    // recuperation des infos du produit contenu dans le panier
+
+    let productId = product.id;
+    let productQty = product.qty;
+    let productColor = product.color;
+
+    // recuperation des infos du produit contenu via l' API
+
+    let apiUrl = "http://localhost:3000/api/products/" + productId;
 
     fetch(apiUrl)
       // Conversion au format Json des données recues de l' API
-
       .then(function (res) {
         return res.json();
       })
 
-      // recueration du prix et de l' url de l' image du produit
+      // recueration du prix et de l' url de l' image du produit et affichage des produits dans le panier
       .then(function (data) {
+        let productPrice = data.price;
+        let productImgUrl = data.imageUrl;
+        let productName = data.name;
 
-         tabResult.prix = data.price;
-         tabResult.urlimg = data.imageUrl;
-         tabResult.nom = data.name;
+        // Affiche un seul produit du panier
+        displayOneItemInCart(
+          productId,
+          productColor,
+          productImgUrl,
+          productName,
+          productPrice
+        );
       })
 
       .catch(function (err) {
         alert("il s'est produit une erreur: " + err);
       });
+  }
+}
 
-    return tabResult
- }
+// fonction qui recupere les produits du panier dans le local storage
 
- // fonction qui recupere les produits du panier dans le local storage
+function getCartInlocalStorage() {
+  let cart = JSON.parse(window.localStorage.getItem("product"));
+  console.log(localStorage);
+  console.log(cart);
+  return cart;
+}
 
- function getCartInlocalStorage(){
+//Creation de l' élement Article.
 
-     let cart = JSON.parse(window.localStorage.getItem("product"));
-     console.log(localStorage)
-     console.log(cart)
-     return cart
- }
+function createElementArticle(id, color) {
+  let article = document.createElement("article");
+  article.setAttribute("class", "cart__item");
+  article.setAttribute("data-id", id);
+  article.setAttribute("data-color", color);
+  sectionItems.appendChild(article);
+  return article;
+}
 
- 
+//ceation de l' élément div conteneur et de l' image du produit
 
- //Creation de l' élement Article.
+function createElementDivContainerAndImg(elementArticle, urlImg) {
+  let divContainerImg = document.createElement("div");
+  divContainerImg.setAttribute("class", "cart__item__img");
+  elementArticle.appendChild(divContainerImg);
 
- function createElementArticle(id, color){
+  let imgProduct = document.createElement("img");
+  imgProduct.setAttribute("src", urlImg);
+  divContainerImg.appendChild(imgProduct);
+}
 
-     let article = document.createElement("article");
-     article.setAttribute("class","cart__item");
-     article.setAttribute("data-id",id);
-     article.setAttribute("data-color",color);
-     sectionItems.appendChild(article);
-     return article
-     
- }
-
- //ceation de l' élément div conteneur et de l' image du produit
-
- function createElementDivContainerAndImg(elementArticle, urlImg) {
-
-   let divContainerImg = document.createElement("div");
-   divContainerImg.setAttribute("class", "cart__item__img");
-   elementArticle.appendChild(divContainerImg);
-
-   let imgProduct = document.createElement("img");
-   imgProduct.setAttribute("src", urlImg);
-   imgProduct.appendChild(divContainerImg);
-  
- }
-
- // creation de l' element conteneur parent description , parametre 
-function createElementDivMainContent(elementArticle){
-
-    let divContainerMainContent  = document.createElement("div");
-    divContainerMainContent.setAttribute("class", "cart__item__content");
-    elementArticle.appendChild(divContainerMainContent);
-    return divContainerMainContent
+// creation de l' element conteneur parent description , parametre
+function createElementDivMainContent(elementArticle) {
+  let divContainerMainContent = document.createElement("div");
+  divContainerMainContent.setAttribute("class", "cart__item__content");
+  elementArticle.appendChild(divContainerMainContent);
+  return divContainerMainContent;
 }
 
 //creation de l' element conteneur description
@@ -104,8 +110,11 @@ function createElementDivContainerDescription(
   productPrice
 ) {
   let divContainerDescription = document.createElement("div");
-  divContainerImg.setAttribute("class", "cart__item__content__description");
-  divContainerMainContent.appenchild(divContainerDescription);
+  divContainerDescription.setAttribute(
+    "class",
+    "cart__item__content__description"
+  );
+  divContainerMainContent.appendChild(divContainerDescription);
 
   let pName = document.createElement("p");
   divContainerDescription.appendChild(pName);
@@ -120,120 +129,82 @@ function createElementDivContainerDescription(
   pPrice.innerText = productPrice;
 }
 
-//creation de l' element conteneur parametre 
+//creation de l' element conteneur parametre
 
 function createElementDivContainerSetting(divContainerMainContent) {
-
   let divContainerSetting = document.createElement("div");
   divContainerSetting.setAttribute("class", "cart__item__content__settings");
-  divContainerMainContent.appenchild(divContainerSetting);
-  return divContainerSetting
+  divContainerMainContent.appendChild(divContainerSetting);
+  return divContainerSetting;
 }
 
-// creation de l' élément conteneur parametre quantité 
+// creation de l' élément conteneur parametre quantité
 
-function createElementDivContainerSetQty(divContainerSetting){
+function createElementDivContainerSetQty(divContainerSetting) {
+  let divContainerSetQty = document.createElement("div");
+  divContainerSetQty.setAttribute(
+    "class",
+    "cart__item__content__settings__quantity"
+  );
+  divContainerSetting.appendChild(divContainerSetQty);
 
-    let divContainerSetQty = document.createElement("div");
-    divContainerSetQty.setAttribute("class", "cart__item__content__settings__quantity");
-    divContainerSetting.appenchild(divContainerSetQty);
+  let pQty = document.createElement("p");
+  divContainerSetQty.appendChild(pQty);
+  pQty.innerText = "Qté : ";
 
-    let pQty = document.createElement("p");
-    divContainerSetQty.appenchild(pQty);
-    pQty.innerText("Qté : ");
-
-    let inputSetQty = document.createElement("input");
-    inputSetQty.setAttribute("type", "number");
-    inputSetQty.setAttribute("class", "itemQuantity");
-    inputSetQty.setAttribute("name", "itemQuantity");
-    inputSetQty.setAttribute("min", "1");
-    inputSetQty.setAttribute("max", "100");
-    inputSetQty.setAttribute("value", "1");
-    divContainerSetQty.appendChild(inputSetQty);
+  let inputSetQty = document.createElement("input");
+  inputSetQty.setAttribute("type", "number");
+  inputSetQty.setAttribute("class", "itemQuantity");
+  inputSetQty.setAttribute("name", "itemQuantity");
+  inputSetQty.setAttribute("min", "1");
+  inputSetQty.setAttribute("max", "100");
+  inputSetQty.setAttribute("value", "1");
+  divContainerSetQty.appendChild(inputSetQty);
 }
 
 // creation de l' élément conteneur parametre suppression
 
 function createElementDivContainerSetDelete(divContainerSetting) {
-
   let divContainerSetDelete = document.createElement("div");
   divContainerSetDelete.setAttribute(
     "class",
     "cart__item__content__settings__delete"
   );
-  divContainerSetting.appenchild(divContainerSetDelete);
+  divContainerSetting.appendChild(divContainerSetDelete);
 
   let deleteItem = document.createElement("p");
   deleteItem.setAttribute("class", "deleteItem");
   deleteItem.innerText = "Supprimer";
-  divContainerSetDelete.appenchild(deleteItem);
+  divContainerSetDelete.appendChild(deleteItem);
 }
-
 
 //fonction  permettant d' afficher un produit et ses infos correspondante dans le DOM
 
-function displayOneItemInCart(pId,pColor,pUrl,pName,pPrice){
-
-    let productId = pId;
-    let productColor = pColor;
-    let productUrlImg = pUrl;
-    let productName = pName;
-    let productPrice = pPrice;
-
-    let article = createElementArticle(productId, productColor);
-    createElementDivContainerAndImg(article, productUrlImg);
-    let mainContent = createElementDivMainContent(article);
-    createElementDivContainerDescription(
-      mainContent,  
-      productName,
-      productColor,
-      productPrice
-    );
-    let containerSetting = createElementDivContainerSetting(mainContent);
-    createElementDivContainerSetQty(containerSetting);
-    createElementDivContainerSetDelete(containerSetting);
-
-
+function displayOneItemInCart(
+  productId,
+  productColor,
+  productImgUrl,
+  productName,
+  productPrice
+) {
+  let article = createElementArticle(productId, productColor);
+  createElementDivContainerAndImg(article, productImgUrl);
+  let mainContent = createElementDivMainContent(article);
+  createElementDivContainerDescription(
+    mainContent,
+    productName,
+    productColor,
+    productPrice
+  );
+  let containerSetting = createElementDivContainerSetting(mainContent);
+  createElementDivContainerSetQty(containerSetting);
+  createElementDivContainerSetDelete(containerSetting);
 }
-
-//fonction global qui affiche le contenu du panier
-
-function displayCart(){
-
-    //recupere le panier contenu dans le local storage
-    let cart = getCartInlocalStorage();
-
-    
-    for (let product of cart){
-        
-        //recupere l' Id du produit, la couleur, la quantité dans le panier
-        let productId = product.id;
-        let productColor = product.color;
-        let productQty = product.qty;
-        
-        //recupere le prix , l' url de l' image et le nom du produit sur l' api
-        let tabResult = getProductDataFromApi(productId);
-
-        //affiche les informations du produit dans le DOM
-        displayOneItemInCart(productId, productColor, tabResult.urlimg, tabResult.nom, tabResult.prix);
-
-    }
-
-
-}
-
 
 /*************************************************************************************************************
  * *************** code principal pour partie 1 ************************************************************/
- /********************************************************************************************************* */
+/********************************************************************************************************* */
 
- displayCart();
+//fonction global qui affiche le contenu du panier
 
-
-
-
-
-
-
-
-
+displayProductsInCart();
