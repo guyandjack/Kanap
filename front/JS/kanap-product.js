@@ -161,8 +161,10 @@ function checkNewProductIfAlreadyExist(newProduct, actualBucket){
     for (let i = 0; i < actualBucket.length; i++){
 
         if (newProduct.id == actualBucket[i].id && newProduct.color == actualBucket[i].color){
-            // Si le produit existe deja on incremente la qte produit dans le panier existant
-            //product.qty += newProduct.qty ;
+
+            // Si le produit existe deja dans le panier actuel:
+            // un booelen passe true, recupere la qte du nouveau produit, recupere l' indexe du produit concerné dans le panier actuel
+            
             exist = [true, newProduct.qty, i]; 
             break
         }
@@ -210,6 +212,11 @@ function pushToBucket() {
     
 
     saveBucketInLocalStorage(bucket);
+
+    //redirection vers page panier
+    window.location.href =
+      "file:///D:/Cours%20informatique/openclassroom/Formation/projet-5-JS/P5-Dev-Web-Kanap/front/html/cart.html"
+    ;
     
 
 

@@ -17,48 +17,91 @@ const sectionItems = document.getElementById("cart__items");
 // Fonction principale qui affiche les produits sur la page panier
 
 function displayProductsInCart() {
+
+  // variables liees au DOM
+  let totalProductContainer = document.getElementById("totalQuantity");
+  let totalPriceContainer = document.getElementById("totalPrice");
+
+  // variable contemant les totaux
+  let totalQty = 0;
+  let totalPrice = 0;
+
   // recuperation du panier dans le local storage
   let cart = getCartInlocalStorage();
+  console.log(cart)
 
   // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
 
-  for (let product of cart) {
-    // recuperation des infos du produit contenu dans le panier
+  if(cart != null){
 
-    let productId = product.id;
-    let productQty = product.qty;
-    let productColor = product.color;
+    for (let product of cart) {
 
-    // recuperation des infos du produit contenu via l' API
+      // recuperation des infos du produit contenu dans le panier
+      
+      let productId = product.id;
+      let productQty = product.qty;
+      let productColor = product.color;
 
-    let apiUrl = "http://localhost:3000/api/products/" + productId;
+      console.log(productQty)
+      
+      // calcul et affichage  du nombre de produit total dans le panier
+      totalQty += productQty;
+      totalProductContainer.innerText = totalQty;
 
-    fetch(apiUrl)
-      // Conversion au format Json des données recues de l' API
-      .then(function (res) {
-        return res.json();
-      })
+      // recuperation des infos du produit contenu via l' API
 
-      // recueration du prix et de l' url de l' image du produit et affichage des produits dans le panier
-      .then(function (data) {
-        let productPrice = data.price;
-        let productImgUrl = data.imageUrl;
-        let productName = data.name;
+      let apiUrl = "http://localhost:3000/api/products/" + productId;
 
-        // Affiche un seul produit du panier
-        displayOneItemInCart(
-          productId,
-          productColor,
-          productImgUrl,
-          productName,
-          productPrice
-        );
-      })
+      fetch(apiUrl)
+        // Conversion au format Json des données recues de l' API
+        .then(function (res) {
+          return res.json();
+        })
 
-      .catch(function (err) {
-        alert("il s'est produit une erreur: " + err);
-      });
+        // recueration du prix et de l' url de l' image du produit et affichage des produits dans le panier
+        .then(function (data) {
+
+          let productPrice = data.price;
+          let productImgUrl = data.imageUrl;
+          let productName = data.name;
+
+          console.log(productPrice)
+
+          // calcul du prix total du panier
+          totalPrice += productQty * productPrice ;
+          totalPriceContainer.innerText = totalPrice;
+
+          // Affiche un seul produit du panier
+          displayOneItemInCart(
+            productId,
+            productQty,
+            productColor,
+            productImgUrl,
+            productName,
+            productPrice
+          );
+
+          
+
+          
+          
+        })
+
+        .catch(function (err) {
+          alert("il s'est produit une erreur: " + err);
+        });
+
+
+    }
   }
+
+  else{
+    alert("Votre panier est vide !");
+  }
+
+  
+  
+  
 }
 
 // fonction qui recupere les produits du panier dans le local storage
@@ -73,6 +116,7 @@ function getCartInlocalStorage() {
 //Creation de l' élement Article.
 
 function createElementArticle(id, color) {
+
   let article = document.createElement("article");
   article.setAttribute("class", "cart__item");
   article.setAttribute("data-id", id);
@@ -84,6 +128,7 @@ function createElementArticle(id, color) {
 //ceation de l' élément div conteneur et de l' image du produit
 
 function createElementDivContainerAndImg(elementArticle, urlImg) {
+
   let divContainerImg = document.createElement("div");
   divContainerImg.setAttribute("class", "cart__item__img");
   elementArticle.appendChild(divContainerImg);
@@ -95,6 +140,7 @@ function createElementDivContainerAndImg(elementArticle, urlImg) {
 
 // creation de l' element conteneur parent description , parametre
 function createElementDivMainContent(elementArticle) {
+
   let divContainerMainContent = document.createElement("div");
   divContainerMainContent.setAttribute("class", "cart__item__content");
   elementArticle.appendChild(divContainerMainContent);
@@ -140,7 +186,7 @@ function createElementDivContainerSetting(divContainerMainContent) {
 
 // creation de l' élément conteneur parametre quantité
 
-function createElementDivContainerSetQty(divContainerSetting) {
+function createElementDivContainerSetQty(divContainerSetting, qty) {
   let divContainerSetQty = document.createElement("div");
   divContainerSetQty.setAttribute(
     "class",
@@ -158,13 +204,14 @@ function createElementDivContainerSetQty(divContainerSetting) {
   inputSetQty.setAttribute("name", "itemQuantity");
   inputSetQty.setAttribute("min", "1");
   inputSetQty.setAttribute("max", "100");
-  inputSetQty.setAttribute("value", "1");
+  inputSetQty.setAttribute("value", qty );
   divContainerSetQty.appendChild(inputSetQty);
 }
 
 // creation de l' élément conteneur parametre suppression
 
-function createElementDivContainerSetDelete(divContainerSetting) {
+function createElementDivContainerSetDelete(divContainerSetting, productId, productColor) {
+
   let divContainerSetDelete = document.createElement("div");
   divContainerSetDelete.setAttribute(
     "class",
@@ -173,19 +220,22 @@ function createElementDivContainerSetDelete(divContainerSetting) {
   divContainerSetting.appendChild(divContainerSetDelete);
 
   let deleteItem = document.createElement("p");
+  deleteItem.addEventListener("click", function(){deleteProductInCart(productId, productColor)});
   deleteItem.setAttribute("class", "deleteItem");
   deleteItem.innerText = "Supprimer";
   divContainerSetDelete.appendChild(deleteItem);
+
 }
 
 //fonction  permettant d' afficher un produit et ses infos correspondante dans le DOM
 
 function displayOneItemInCart(
   productId,
+  productQty,
   productColor,
   productImgUrl,
   productName,
-  productPrice
+  productPrice,
 ) {
   let article = createElementArticle(productId, productColor);
   createElementDivContainerAndImg(article, productImgUrl);
@@ -197,9 +247,45 @@ function displayOneItemInCart(
     productPrice
   );
   let containerSetting = createElementDivContainerSetting(mainContent);
-  createElementDivContainerSetQty(containerSetting);
-  createElementDivContainerSetDelete(containerSetting);
+  createElementDivContainerSetQty(containerSetting, productQty);
+  createElementDivContainerSetDelete(containerSetting, productId, productColor);
 }
+
+// fonction qui suprime un produit du panier 
+function deleteProductInCart(productId, productColor){
+
+  // recupere le panier du localstorage dans un tableau
+  let cart = getCartInlocalStorage();
+
+  
+  for (let item of cart){
+
+    if (item.id == productId && item.color == productColor){
+      
+      // recupere l ' index de l' element qui valide les conditions
+      let index = cart.indexOf(item);
+     
+      // suprime l' element du panier
+      cart.splice(index,1);
+      
+      // mise a jours du panier dans le local storage
+      window.localStorage.removeItem("product")
+      window.localStorage.setItem("product", JSON.stringify(cart));
+      
+      
+      break
+    }
+    
+  }
+  // recharge la page pour reinitialiser l' affichage du panier
+  window.location.reload();
+}
+
+//fonction qui modifie le panier si on modifie la quantire d' un produit
+function upDateCartIfQuantityChange(){
+  
+}
+
 
 /*************************************************************************************************************
  * *************** code principal pour partie 1 ************************************************************/
@@ -208,3 +294,6 @@ function displayOneItemInCart(
 //fonction global qui affiche le contenu du panier
 
 displayProductsInCart();
+
+
+
