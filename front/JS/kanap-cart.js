@@ -186,7 +186,12 @@ function createElementDivContainerSetting(divContainerMainContent) {
 
 // creation de l' élément conteneur parametre quantité
 
-function createElementDivContainerSetQty(divContainerSetting, qty) {
+function createElementDivContainerSetQty(
+  divContainerSetting,
+  productId,
+  productColor,
+  productQty
+) {
   let divContainerSetQty = document.createElement("div");
   divContainerSetQty.setAttribute(
     "class",
@@ -204,8 +209,12 @@ function createElementDivContainerSetQty(divContainerSetting, qty) {
   inputSetQty.setAttribute("name", "itemQuantity");
   inputSetQty.setAttribute("min", "1");
   inputSetQty.setAttribute("max", "100");
-  inputSetQty.setAttribute("value", qty );
+  inputSetQty.setAttribute("value", productQty);
   divContainerSetQty.appendChild(inputSetQty);
+
+  inputSetQty.addEventListener("change", function () {
+    upDateCartIfQuantityChange(this.value, productId, productColor);
+  });
 }
 
 // creation de l' élément conteneur parametre suppression
@@ -220,14 +229,14 @@ function createElementDivContainerSetDelete(divContainerSetting, productId, prod
   divContainerSetting.appendChild(divContainerSetDelete);
 
   let deleteItem = document.createElement("p");
-  deleteItem.addEventListener("click", function(){deleteProductInCart(productId, productColor)});
   deleteItem.setAttribute("class", "deleteItem");
   deleteItem.innerText = "Supprimer";
   divContainerSetDelete.appendChild(deleteItem);
-
+  
+  deleteItem.addEventListener("click", function(){deleteProductInCart(productId, productColor)});
 }
 
-//fonction  permettant d' afficher un produit et ses infos correspondante dans le DOM
+//fonction permettant d' afficher un produit et ses infos correspondante dans le DOM
 
 function displayOneItemInCart(
   productId,
@@ -247,7 +256,7 @@ function displayOneItemInCart(
     productPrice
   );
   let containerSetting = createElementDivContainerSetting(mainContent);
-  createElementDivContainerSetQty(containerSetting, productQty);
+  createElementDivContainerSetQty(containerSetting, productId, productColor, productQty);
   createElementDivContainerSetDelete(containerSetting, productId, productColor);
 }
 
@@ -282,8 +291,27 @@ function deleteProductInCart(productId, productColor){
 }
 
 //fonction qui modifie le panier si on modifie la quantire d' un produit
-function upDateCartIfQuantityChange(){
-  
+
+function upDateCartIfQuantityChange(newqty, productId, productColor){
+
+  // recupere le panier du localstorage dans un tableau
+  let cart = getCartInlocalStorage();
+
+  for (let item of cart) {
+    
+    if (item.id == productId && item.color == productColor) {
+      item.qty = newqty;
+
+      // mise a jours du panier dans le local storage
+      window.localStorage.removeItem("product");
+      window.localStorage.setItem("product", JSON.stringify(cart));
+
+      break;
+    }
+  }
+
+  // recharge la page pour reinitialiser l' affichage du panier
+  window.location.reload();
 }
 
 
