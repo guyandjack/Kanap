@@ -312,7 +312,9 @@ displayProductsInCart();
 /******************** script partie N°2: validation et contrôle des donnees issu du formulaire******************/
 
 // variable liees au DOM
-const buttonOrder = document.getElementById("order");
+
+const form = document.querySelector(".cart__order__form");
+
 
 const inputFirstName = document.getElementById("firstName");
 
@@ -329,6 +331,9 @@ const inputCity = document.getElementById("city");
 const inputEmail = document.getElementById("email");
 
 
+const buttonOrder = document.getElementById("order");
+
+
 
 /**** declaration des fonctions *****/
 
@@ -336,25 +341,39 @@ const inputEmail = document.getElementById("email");
 // fonction qui controle l' input firstName
 
 function checkInputFirstName(inputValue){
-  
+
+  // initialisation des variables 
   const regExFirstName = /[^A-Za-z\- ]/g;
   const firstNameContErrorMessage = document.getElementById("firstNameErrorMsg");
   const errorMsgFirstNameMiss = "Veuillez remplir le champ prenom";
   const errorMsgFirstNameWrong = "Ce champ doit comporter uniquement des lettres";
 
+  // test la valeur de l' argument et lui affecte une valeur
+  if(typeof inputValue == "undefined"){
+    
+    inputValue = inputFirstName.value;
+
+  }
+
+ 
+
   if (inputValue.match(regExFirstName) ){
 
     firstNameContErrorMessage.innerText = errorMsgFirstNameWrong;
+    inputFirstName.style.border = "2px solid red";
+
     return false
   }
   else if (inputValue.length < 2){
 
     firstNameContErrorMessage.innerText = errorMsgFirstNameMiss;
+    inputFirstName.style.border = "2px solid red";
     return false
   }
 
   else {
     firstNameContErrorMessage.innerText = null;
+    inputFirstName.style.border = "2px solid green";
     return true
   }
 
@@ -363,120 +382,204 @@ function checkInputFirstName(inputValue){
 // fonction qui controle l' input lastName
 
 function checkInputLastName(inputValue){
-  
+  // initialisation des variables
   const regExFirstName = /[^A-Za-z\- ]/g;
   const lastNameContErrorMessage = document.getElementById("lastNameErrorMsg");
   const errorMsgLastNameMiss = "Veuillez remplir le champ nom";
-  const errorMsgLastNameWrong = "Ce champ doit comporter uniquement des lettres";
+  const errorMsgLastNameWrong =
+    "Ce champ doit comporter uniquement des lettres";
 
-  if (inputValue.match(regExFirstName)) {
-
-    lastNameContErrorMessage.innerText = errorMsgLastNameWrong;
-    return false
-  } 
-  else if (inputValue.length < 2) {
-
-    lastNameContErrorMessage.innerText = errorMsgLastNameMiss;
-    return false
-  } 
-  else {
-
-    lastNameContErrorMessage.innerText = null;
-    return true
+  // test la valeur de l' argument et lui affecte une valeur
+  if (typeof inputValue == "undefined") {
+    inputValue = inputLastName.value;
   }
 
+  if (inputValue.match(regExFirstName)) {
+    lastNameContErrorMessage.innerText = errorMsgLastNameWrong;
+    inputLastName.style.border = "2px solid red";
+    return false;
+  } else if (inputValue.length < 2) {
+    lastNameContErrorMessage.innerText = errorMsgLastNameMiss;
+    inputLastName.style.border = "2px solid red";
+    return false;
+  } else {
+    lastNameContErrorMessage.innerText = null;
+    inputLastName.style.border = "2px solid green";
+    return true;
+  }
 }
 
 // fonction qui controle l' input adresse
 
 function checkInputAddress(inputValue){
-  
+  // initialisation des variables
   const regExAddress = /[^A-Za-z\- 0-9]/g;
   const addressContErrorMessage = document.getElementById("addressErrorMsg");
   const errorMsgAddressMiss = "Veuillez remplir le champ adresse";
-  const errorMsgAddressWrong = "Ce champ doit comporter uniquement des caracteres alphanumériques";
+  const errorMsgAddressWrong =
+    "Ce champ doit comporter uniquement des caracteres alphanumériques";
 
-  if (inputValue.match(regExAddress)) {
-
-    addressContErrorMessage.innerText = errorMsgAddressWrong;
-    return false
-  } 
-  else if (inputValue.length < 10) {
-
-    addressContErrorMessage.innerText = errorMsgAddressMiss;
-    return false
-  } 
-  else {
-
-    addressContErrorMessage.innerText = null;
-    return true
+  // test la valeur de l' argument et lui affecte une valeur
+  if (typeof inputValue == "undefined") {
+    inputValue = inputAddress.value;
   }
 
+  if (inputValue.match(regExAddress)) {
+    addressContErrorMessage.innerText = errorMsgAddressWrong;
+    inputAddress.style.border = "2px solid red";
+    return false;
+  } else if (inputValue.length < 10) {
+    addressContErrorMessage.innerText = errorMsgAddressMiss;
+    inputAddress.style.border = "2px solid red";
+    return false;
+  } else {
+    addressContErrorMessage.innerText = null;
+    inputAddress.style.border = "2px solid green";
+    return true;
+  }
 }
 
 // fonction qui controle l' input ville
 
 function checkInputCity(inputValue){
-  
+  // initialisation des variables
   const regExCity = /[^A-Za-z\- ]/g;
   const cityContErrorMessage = document.getElementById("cityErrorMsg");
-  const errorMsgCityMiss = "Veuillez remplir le champ adresse";
-  const errorMsgCityWrong = "Ce champ doit comporter uniquement des caracteres alphanumériques";
+  const errorMsgCityMiss = "Veuillez remplir le champ ville ";
+  const errorMsgCityWrong = "Ce champ doit comporter uniquement des lettres";
 
-  if (inputValue.match(regExCity)) {
-
-    cityContErrorMessage.innerText = errorMsgCityWrong;
-    return false
-  } 
-  else if (inputValue.length < 3) {
-
-    cityContErrorMessage.innerText = errorMsgCityMiss;
-    return false
-  } 
-  else {
-
-    cityContErrorMessage.innerText = null;
-    return true
+  // test la valeur de l' argument et lui affecte une valeur
+  if (typeof inputValue == "undefined") {
+    inputValue = inputCity.value;
   }
 
+  if (inputValue.match(regExCity)) {
+    cityContErrorMessage.innerText = errorMsgCityWrong;
+    inputCity.style.border = "2px solid red";
+    return false;
+  } else if (inputValue.length < 3) {
+    cityContErrorMessage.innerText = errorMsgCityMiss;
+    inputCity.style.border = "2px solid red";
+    return false;
+  } else {
+    cityContErrorMessage.innerText = null;
+    inputCity.style.border = "2px solid green";
+    return true;
+  }
 }
 
 // fonction qui controle l' input email
 
 function checkInputEmail(inputValue){
-  
-  const regExEmail = /[^a-z0-9]{1}/g /*[^@]{1}[^a-z0-9\-_]{2,}\.[^a-z\.\-_]+[^a-z\-_]+/g*/;
+  // initialisation des variables
+
+  const regExEmail =
+    /[^a-z0-9]{1}/g; /*[^@]{1}[^a-z0-9\-_]{2,}\.[^a-z\.\-_]+[^a-z\-_]+/g*/
   const emailContErrorMessage = document.getElementById("emailErrorMsg");
   const errorMsgEmailMiss = "Veuillez remplir le champ email";
-  const errorMsgEmailWrong = "Le champ email ne peut pas comporter ce type de caractere";
+  const errorMsgEmailWrong =
+    "Le champ email ne peut pas comporter ce type de caractere";
 
-  if (inputValue.match(regExEmail)) {
-
-    emailContErrorMessage.innerText = errorMsgEmailWrong;
-    return false;
-  } 
-  else if (inputValue.length < 10) {
-
-    emailContErrorMessage.innerText = errorMsgEmailMiss;
-    return false;
-  } 
-  else {
-    emailContErrorMessage.innerText = null;
-    return true;
+  // test la valeur de l' argument et lui affecte une valeur
+  if (typeof inputValue == "undefined") {
+    inputValue = inputEmail.value;
   }
 
+  if (inputValue.match(regExEmail)) {
+    emailContErrorMessage.innerText = errorMsgEmailWrong;
+    inputEmail.style.border = "2px solid red";
+    return false;
+  } else if (inputValue.length < 10) {
+    emailContErrorMessage.innerText = errorMsgEmailMiss;
+    inputEmail.style.border = "2px solid red";
+    return false;
+  } else {
+    emailContErrorMessage.innerText = null;
+    inputEmail.style.border = "2px solid green";
+    return true;
+  }
 }
 
 // function qui controle formulaire apres click sur bouton commander
-function checkValidityOfForm(){
+function checkValidityOfForm(evt) {
   
-  /*if (!checkInputFirstName || !checkInputLastName || !checkInputAddress || !checkInputCity || !checkInputEmail ){
+  // bloque l' envoi du formulaire
+  evt.preventDefault();
+  alert("envoi du formulaire bloque");
 
-    alert("envoi du formulaire bloque")
-    evt.preventDefaut()
-  }*/
-  alert("formulaire envoye")
+  // controle des differentes input du formulaire
+  let checkFirstName = checkInputFirstName();
+  console.log(checkFirstName)
+
+  let checkLastName = checkInputLastName();
+  console.log(checkLastName)
+  
+  let checkAddress = checkInputAddress();
+  console.log(checkAddress)
+
+  let checkCity = checkInputCity();
+  console.log(checkCity)
+  
+  let checkEmail = checkInputEmail();
+  console.log(checkEmail)
+
+  // si tous les retours de fonction sont "true" on envoi les objets au serveur via l api
+  if(checkFirstName && checkLastName && checkAddress && checkCity && checkEmail){
+
+    // objet contact à envoyer
+    let contact = {
+      "firstName" : inputFirstName.value,
+      "lastName" : inputLastName.value,
+      "address" : inputAddress.value,
+      "city" : inputCity.value,
+      "email" : inputEmail.value,
+    }
+    
+
+    console.log(contact)
+
+    // tableau de produit-id à envoyer
+    let cart = getCartInlocalStorage();
+    let products = [];
+
+    for (let item of  cart){
+       
+      products.push((item.id))
+    }
+
+    console.log(products)
+      //form.submit();
+
+    //requette post vers l 'API
+
+    const apiUrl = "http://localhost:3000/order";
+
+    const setFetch = {
+      method: "POST",
+      body: JSON.stringify(contact) + JSON.stringify(products)
+    };
+
+    fetch(apiUrl,setFetch)
+    
+    .then(function (res) {
+      return res.json();
+    })
+
+    .then(function(data){
+      console.log(data)
+    })
+
+    .catch(function (err) {
+          alert("il s'est produit une erreur: " + err);
+        });
+  }
+
+  else{
+    alert("erreur formulaire non envoye")
+  }
+  
 }
+  
 
 inputFirstName.addEventListener("input", function(){ checkInputFirstName(this.value)});
 inputLastName.addEventListener("input", function(){ checkInputLastName(this.value)});
@@ -484,4 +587,4 @@ inputAddress.addEventListener("input", function(){ checkInputAddress(this.value)
 inputCity.addEventListener("input", function(){ checkInputCity(this.value)});
 inputEmail.addEventListener("input", function(){ checkInputEmail(this.value)});
 
-buttonOrder.addEventListener("click", function(){ checkValidityOfForm });
+buttonOrder.addEventListener("click",  checkValidityOfForm );
