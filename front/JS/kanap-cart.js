@@ -324,10 +324,10 @@ const inputAddress = document.getElementById("address");
 
 
 const inputCity = document.getElementById("city");
-const cityContErrorMessage = document.getElementById("cityErrorMsg");
+
 
 const inputEmail = document.getElementById("email");
-const emailContErrorMessage = document.getElementById("emailErrorMsg");
+
 
 
 /**** declaration des fonctions *****/
@@ -445,7 +445,7 @@ function checkInputCity(inputValue){
 
 function checkInputEmail(inputValue){
   
-  const regExEmail = /[^a-z\- ]+[^a-z0-9\.\-_]*[^@]{1}[^a-z0-9\-_]{2,}\.[^a-z\.\-_]+[^a-z\-_]+/g;
+  const regExEmail = /[^a-z0-9]{1}/g /*[^@]{1}[^a-z0-9\-_]{2,}\.[^a-z\.\-_]+[^a-z\-_]+/g*/;
   const emailContErrorMessage = document.getElementById("emailErrorMsg");
   const errorMsgEmailMiss = "Veuillez remplir le champ email";
   const errorMsgEmailWrong = "Le champ email ne peut pas comporter ce type de caractere";
