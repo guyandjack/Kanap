@@ -545,11 +545,18 @@ function checkValidityOfForm(evt) {
 
     for (let item of  cart){
        
-      products.push(JSON.stringify(item.id))
+      products.push(item.id)
     }
 
     console.log(products)
       //form.submit();
+
+      let bodyRequest = {
+        "contact" : contact,
+        "products" : products
+      };
+
+      let brequest = JSON.stringify(bodyRequest);
 
     //requette post vers l 'API
 
@@ -557,7 +564,10 @@ function checkValidityOfForm(evt) {
 
     const setFetch = {
       method: "POST",
-      body: {contact  products
+      body: brequest,
+      headers : {
+        "content-Type" : "application/json",
+      }
     };
 
     fetch(apiUrl,setFetch)
