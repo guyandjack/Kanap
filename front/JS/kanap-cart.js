@@ -528,13 +528,14 @@ function checkValidityOfForm(evt) {
 
     // objet contact à envoyer
     let contact = {
-      "firstName" : inputFirstName.value,
-      "lastName" : inputLastName.value,
-      "address" : inputAddress.value,
-      "city" : inputCity.value,
-      "email" : inputEmail.value,
-    }
+      firstName: inputFirstName.value,
+      lastName: inputLastName.value,
+      address: inputAddress.value,
+      city: inputCity.value,
+      email: inputEmail.value
+    };
     
+    console.log(typeof inputFirstName.value)
 
     console.log(contact)
 
@@ -544,7 +545,7 @@ function checkValidityOfForm(evt) {
 
     for (let item of  cart){
        
-      products.push((item.id))
+      products.push(JSON.stringify(item.id))
     }
 
     console.log(products)
@@ -552,11 +553,11 @@ function checkValidityOfForm(evt) {
 
     //requette post vers l 'API
 
-    const apiUrl = "http://localhost:3000/order";
+    const apiUrl = "http://localhost:3000/api/products/order";
 
     const setFetch = {
       method: "POST",
-      body: JSON.stringify(contact) + JSON.stringify(products)
+      body: {contact  products
     };
 
     fetch(apiUrl,setFetch)
