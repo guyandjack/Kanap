@@ -1,93 +1,31 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- *********************             site: Kanap             ****************************************************
- ******************* script partie N°1: permet l' affichage du panier client *********************************
- ******************* script partie N°2: validation et contrôle des donnees issu du formulaire******************
+ ***********                       site: Kanap                                                 ****************
+ ***********          
+ *********           script partie N°1: permet l' affichage du panier client                     *************
+
+ *********           script partie N°2: validation et contrôle des donnees issu du formulaire          ******
+
  **************************************************************************************************************
  **************************************************************************************************************/
 
-/*************** script partie N°1: permet l' affichage du panier client ****************************************
 
-/******* constante globales    *****/
+/***************************************************************************************************************
+/*************** script partie N°1: permet l' affichage du panier client ***************************************
+ **************************************************************************************************************/
+
+
+/******* constante globales    *****
+ * *********************************/
 
 const sectionItems = document.getElementById("cart__items");
 
-/**** declaration des fonctions *****/
+/**** declaration des fonctions *****
+ * **********************************/
 
-// Fonction principale qui affiche les produits sur la page panier
 
-function displayProductsInCart() {
-  // variables liees au DOM
-  let totalProductContainer = document.getElementById("totalQuantity");
-  let totalPriceContainer = document.getElementById("totalPrice");
 
-  // variable contemant les totaux
-  let totalQty = 0;
-  let totalPrice = 0;
-
-  // recuperation du panier dans le local storage
-  let cart = getCartInlocalStorage();
-  console.log(cart);
-
-  // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
-
-  if (cart != null) {
-    for (let product of cart) {
-      // recuperation des infos du produit contenu dans le panier
-
-      let productId = product.id;
-      let productQty = product.qty;
-      let productColor = product.color;
-
-      console.log(productQty);
-
-      // calcul et affichage  du nombre de produit total dans le panier
-      totalQty += productQty;
-      totalProductContainer.innerText = totalQty;
-
-      // recuperation des infos du produit contenu via l' API
-
-      let apiUrl = "http://localhost:3000/api/products/" + productId;
-
-      fetch(apiUrl)
-        // Conversion au format Json des données recues de l' API
-        .then(function (res) {
-          return res.json();
-        })
-
-        // recueration du prix et de l' url de l' image du produit et affichage des produits dans le panier
-        .then(function (data) {
-          let productPrice = data.price;
-          let productImgUrl = data.imageUrl;
-          let productName = data.name;
-
-          console.log(productPrice);
-
-          // calcul du prix total du panier
-          totalPrice += productQty * productPrice;
-          totalPriceContainer.innerText = totalPrice;
-
-          // Affiche un seul produit du panier
-          displayOneItemInCart(
-            productId,
-            productQty,
-            productColor,
-            productImgUrl,
-            productName,
-            productPrice
-          );
-        })
-
-        .catch(function (err) {
-          alert("il s'est produit une erreur: " + err);
-        });
-    }
-  } else {
-    alert("Votre panier est vide !");
-  }
-}
-
-// fonction qui recupere les produits du panier dans le local storage
+// Recupere les produits du panier dans le local storage
 
 function getCartInlocalStorage() {
   let cart = JSON.parse(window.localStorage.getItem("product"));
@@ -96,7 +34,7 @@ function getCartInlocalStorage() {
   return cart;
 }
 
-//Creation de l' élement Article.
+// Creation de l' élement Article.
 
 function createElementArticle(id, color) {
   let article = document.createElement("article");
@@ -217,7 +155,7 @@ function createElementDivContainerSetDelete(
   divContainerSetDelete.appendChild(deleteItem);
 
   deleteItem.addEventListener("click", function () {
-    deleteProductInCart(productId, productColor);
+    deleteItemFromCartInDom(productId, productColor);
   });
 }
 
@@ -232,69 +170,210 @@ function displayOneItemInCart(
   productPrice
 ) {
   let article = createElementArticle(productId, productColor);
+
   createElementDivContainerAndImg(article, productImgUrl);
+
   let mainContent = createElementDivMainContent(article);
+
   createElementDivContainerDescription(
     mainContent,
     productName,
     productColor,
     productPrice
   );
+
   let containerSetting = createElementDivContainerSetting(mainContent);
+
   createElementDivContainerSetQty(
     containerSetting,
     productId,
     productColor,
     productQty
   );
+
   createElementDivContainerSetDelete(containerSetting, productId, productColor);
 }
 
-// fonction qui suprime un produit du panier
-function deleteProductInCart(productId, productColor) {
-  // recupere le panier du localstorage dans un tableau
-  let cart = getCartInlocalStorage();
 
-  for (let item of cart) {
-    if (item.id == productId && item.color == productColor) {
-      // recupere l ' index de l' element qui valide les conditions
-      let index = cart.indexOf(item);
+// Mise à jour des totaux du panier  qte et prix 
 
-      // suprime l' element du panier
-      cart.splice(index, 1);
+function displayTotalPriceAndQuantity(){
 
-      // mise a jours du panier dans le local storage
-      window.localStorage.removeItem("product");
-      window.localStorage.setItem("product", JSON.stringify(cart));
+ 
+  let tabOfItem = document.querySelectorAll("article.cart__item");
+  console.log(tabOfItem);
 
-      break;
+  
+  let tabResult = {
+    totalqty: null,
+    totalprice: null,
+  };
+
+  let divTotalQty = document.getElementById("totalQuantity");
+  let divTotalPrice = document.getElementById("totalPrice");
+
+  
+
+    if (tabOfItem.length != 0) {
+      
+      
+
+      for (let item of tabOfItem) {
+
+        // recuperation de la qte sur un produit
+        let qtyValue = parseFloat(item.querySelector(".itemQuantity").value);
+
+        tabResult.totalqty += qtyValue;
+
+        // recuperation du prix pour un produit
+        let priceValue = parseFloat(
+          item.querySelector(".cart__item__content__description :nth-child(3)")
+            .textContent
+        );
+
+        tabResult.totalprice += qtyValue * priceValue;
+
+        //affichage des totaux
+       divTotalQty.innerText = tabResult.totalqty;
+  
+       divTotalPrice.innerText = tabResult.totalprice;
+
+       console.log(tabResult)
+      }
+
     }
-  }
-  // recharge la page pour reinitialiser l' affichage du panier
-  window.location.reload();
+ 
 }
 
-//fonction qui modifie le panier si on modifie la quantire d' un produit
+//fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
 function upDateCartIfQuantityChange(newqty, productId, productColor) {
+  
   // recupere le panier du localstorage dans un tableau
   let cart = getCartInlocalStorage();
 
   for (let item of cart) {
 
     if (item.id == productId && item.color == productColor) {
+
       item.qty = newqty;
 
-      // mise a jours du panier dans le local storage
-      window.localStorage.removeItem("product");
+      // mise à jours du panier dans le local storage
+      
       window.localStorage.setItem("product", JSON.stringify(cart));
 
       break;
     }
   }
 
-  // recharge la page pour reinitialiser l' affichage du panier
-  window.location.reload();
+  // affiche les totaux prix et qte
+  displayTotalPriceAndQuantity();
+
+  
+}
+
+
+// supprime un produit apres un click sur le bouton suprimer  
+
+function deleteItemFromCartInDom(productId, productColor){
+
+  //supression dans le local storage
+  let cart = getCartInlocalStorage();
+
+  for (let item of cart){
+
+    if(item.id == productId && item.color == productColor){
+
+      // recupere l^index de l' item a suprimer
+      let index = cart.indexOf(item);
+
+      // supprime l' item dans le panier
+      cart.splice(index, 1);
+
+      //mise à jour du panier dans le local storage avec l' item supprimer
+      window.localStorage.setItem("product", JSON.stringify(cart));
+
+      break
+    }
+  }
+
+  
+  // supression de l' item dans le DOM
+  let itemFromDom = document.querySelector("article[data-id='" + productId + "']" + "[data-color='" + productColor + "']");
+  itemFromDom.remove();
+
+  //mise a jour et affichage des totaux  prix et qte
+  displayTotalPriceAndQuantity();
+}
+
+// Fonction principale qui affiche les produits sur la page panier
+
+function displayProductsInCart() {
+  
+
+  // récuperation du panier dans le local storage
+  let cart = getCartInlocalStorage();
+  console.log(cart);
+  
+  // trie du tableau par id 
+  cart.sort(function(a,b){
+    return (a.id).localeCompare((b.id)) 
+  })
+  console.log(cart);
+
+  // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
+
+  if (cart != null) {
+    for (let product of cart) {
+      // recuperation des infos du produit contenu dans le panier
+
+      let productId = product.id;
+      let productQty = product.qty;
+      let productColor = product.color;
+
+      console.log(productQty);
+
+      // recuperation des infos du produit contenu via l' API
+
+      let apiUrl = "http://localhost:3000/api/products/" + productId;
+
+      fetch(apiUrl)
+        // Conversion au format Json des données recues de l' API
+        .then(function (res) {
+          return res.json();
+        })
+
+        // recueration du prix et de l' url de l' image du produit recu de l' API
+        .then(function (data) {
+          let productPrice = data.price;
+          let productImgUrl = data.imageUrl;
+          let productName = data.name;
+
+          
+          // Affiche un seul produit du panier
+          displayOneItemInCart(
+            productId,
+            productQty,
+            productColor,
+            productImgUrl,
+            productName,
+            productPrice
+          );
+        })
+
+        // Misa à jour et affichage des totaux prix et qte
+        .then (function (){
+          displayTotalPriceAndQuantity();
+        })
+
+        .catch(function (err) {
+          alert("il s'est produit une erreur: " + err);
+        });
+    }
+
+  } else {
+    alert("Votre panier est vide !");
+  }
 }
 
 /*************************************************************************************************************
@@ -549,7 +628,7 @@ function checkValidityOfForm(evt) {
     }
 
     console.log(products)
-      //form.submit();
+      
 
       let bodyRequest = {
         "contact" : contact,
@@ -577,7 +656,9 @@ function checkValidityOfForm(evt) {
     })
 
     .then(function(data){
-      console.log(data)
+
+      let idOrder = data.orderId;
+      window.location.href = "./confirmation.html?orderId=" + idOrder;
     })
 
     .catch(function (err) {

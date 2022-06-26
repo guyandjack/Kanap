@@ -189,8 +189,7 @@ function pushToBucket() {
   saveBucketInLocalStorage(bucket);
 
   //redirection vers page panier
-  /*window.location.href =
-    "file:///D:/Cours%20informatique/openclassroom/Formation/projet-5-JS/P5-Dev-Web-Kanap/front/html/cart.html";*/
+  window.location.href = "./cart.html" ;
 }
 
 /**************** code principal  ***********************/
