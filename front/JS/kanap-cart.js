@@ -242,6 +242,14 @@ function displayTotalPriceAndQuantity(){
       }
 
     }
+    else {
+
+      divTotalQty.innerText = 0;
+
+      divTotalPrice.innerText = 0;
+
+
+    }
  
 }
 
