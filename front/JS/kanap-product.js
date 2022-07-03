@@ -6,17 +6,18 @@
  **************************************************************************************************************/
 
 /*** constantes liées au DOM ************/
-const buttonBucket = document.getElementById("addToCart");
+const buttonCart = document.getElementById("addToCart");
 
 /*** variables de fonctionnement*** */
 
 // contient la valeur du local storage sous forme d' objet
-let bucket;
+let cart;
 
+// Initialisation de la variable "cart" avec le local storage si un produit existe dans ce dernier
 if (window.localStorage.getItem("product") != null) {
-  bucket = JSON.parse(window.localStorage.getItem("product"));
+  cart = JSON.parse(window.localStorage.getItem("product"));
 } else {
-  bucket = [];
+  cart = [];
 }
 
 /***** declaration des fonctions ****** */
@@ -31,17 +32,17 @@ function getDataUrl() {
 
     return idValue;
   } catch (e) {
-    return e.code;
+    alert("erreur impossible de récuperer l' ID produit dans l' url: " + e);
   }
 }
 
-//crée un élément html "img" avec attribut src et alt dans l' élément "div class=items__img"
+//crée un élément html "img" avec attribut src et alt dans l' élément "div class=item__img"
 
-function createImg(arg1, arg2) {
+function createImg(urlImg, textAlt) {
   const containerImg = document.querySelector(".item__img");
   newImg = document.createElement("img");
-  newImg.setAttribute("src", arg1);
-  newImg.setAttribute("alt", arg2);
+  newImg.setAttribute("src", urlImg);
+  newImg.setAttribute("alt", textAlt);
   containerImg.appendChild(newImg);
 }
 
@@ -59,10 +60,10 @@ function insertDataText(name, price, desc) {
 
 // Crée les element option dans le DOM  permetant le choix de la couleur par l' utilisateur
 
-function createOption(arg) {
+function createOption(arrayOfColors) {
   const select = document.getElementById("colors");
 
-  for (color of arg) {
+  for (color of arrayOfColors) {
     newOption = document.createElement("option");
     newOption.setAttribute("value", color);
     newOption.innerText = color;
@@ -70,7 +71,7 @@ function createOption(arg) {
   }
 }
 
-// Fonction principale qui regroupe l' ensemble des fonctions permetant l' affichage des données correspondant au produit selectionné sur page accueil
+// Fonction principale  permetant l' affichage des données correspondant au produit selectionné sur la page accueil
 
 function displayDataProductById() {
   // obtient l' id du produit contenu dans l' url de la page courante
@@ -116,11 +117,11 @@ function getColor() {
 }
 
 //enregistre les données du panier dans le local storage
-function saveBucketInLocalStorage(arg) {
+function saveCartInLocalStorage(arg) {
   window.localStorage.setItem("product", JSON.stringify(arg));
 }
 
-//Verifie si le nouveau produit existe deja
+/*//Verifie si le nouveau produit existe deja
 function checkNewProductIfAlreadyExist(newProduct, actualBucket) {
   let exist = {
     "ifexist": false,
@@ -147,54 +148,58 @@ function checkNewProductIfAlreadyExist(newProduct, actualBucket) {
   }
 
   return exist;
-}
+}*/
 
 // enrgistre les produits, la qte, la couleur dans le panier
-function pushToBucket() {
+function pushToCart() {
   // recupere la qte et la couleur choisi par l' utilisateur
   let qty = getQuantity();
   let color = getColor();
 
   // nouveau produit
-  let valueToPushInBucket = {
-    "id": idValue,
-    "qty": qty,
-    "color": color
+  let newProductToPushInCart = {
+    id: idValue,
+    qty: qty,
+    color: color,
   };
 
-  console.log(bucket);
-  console.log(valueToPushInBucket);
+  console.log(cart);
+  console.log(newProductToPushInCart);
 
   // verifie si le produit existe deja dans le panier
-  let check = checkNewProductIfAlreadyExist(valueToPushInBucket, bucket);
+  let check = checkNewProductIfAlreadyExist(newProductToPushInCart, cart);
   console.log(check);
 
   // si le nouveau produit n' existe pas on le rajoute au panier
   if (check.ifexist == false) {
-    bucket.push(valueToPushInBucket);
+    cart.push(newProductToPushInCart);
   }
-  // si il existe on modifie la quqntite correspondant au produit du pannier existant
+  // si il existe on modifie la quantite correspondant au produit du pannier existant
   else {
-    bucket[check.indexitemexist].qty += check.newqty;
+    cart[check.indexitemexist].qty =
+      parseInt(check.newqty) + parseInt(cart[check.indexitemexist].qty);
   }
-  console.log(bucket);
-  
-  // trie du panier en fonction des models et des couleurs
-  bucket.sort((a,b) => a.id + b.id );
-  
-  
-  console.log(bucket);
 
-
-  saveBucketInLocalStorage(bucket);
+  saveCartInLocalStorage(cart);
 
   //redirection vers page panier
-  window.location.href = "./cart.html" ;
+  window.location.href = "./cart.html";
 }
 
-/**************** code principal  ***********************/
+// fonction globale pour l' execution du script principal
 
-// fonction principale pour la page product
+function runKanapProduct() {
+  
+  // Affiche dans la page product, le produit selctionné par l' utilisteur .
 
-displayDataProductById();
-buttonBucket.addEventListener("click", pushToBucket);
+  displayDataProductById();
+
+  // Enregistre le produit dans le panier lorsque l' utilisteur click sur "ajouter au panier"
+
+  buttonCart.addEventListener("click", pushToCart);
+}
+
+/********************************************** script principal  *********************************************/
+
+// execution du script
+runKanapProduct();

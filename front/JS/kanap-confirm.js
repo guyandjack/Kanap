@@ -17,12 +17,18 @@ function displayOrderId(orderId){
 
 }
 
+//vide le panier contenu dans le local storage
+function deleteCart(){
+    window.localStorage.clear();
+}
+
 // fonction principale
 
 function getAndDisplayOrder(){
 
     let orderValue = getOrderIdFromUrl();
     displayOrderId(orderValue);
+    deleteCart()
 }
 
 

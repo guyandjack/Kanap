@@ -65,7 +65,7 @@ function displayOneproduct(idProduct, productName, imgUrl, altText, productDescr
   createP(productDescription);
 }
 
-// Fonction principale qui regroupe l' ensemble des fonctions permetant la communication avec l' API et l' affichage des produits
+// Fonction principale permetant la communication avec l' API et l' affichage des produits
 
 function displayProducts() {
 
@@ -92,14 +92,14 @@ function displayProducts() {
       }
     })
 
-    // Affichage d' une erreurr éventuelle dans une fenetre pop up
+    // Affichage d' une erreur éventuelle dans une fenetre pop up
     .catch(function (err) {
       alert("il s'est produit une erreur: " + err);
     });
 }
 
-// ****************************************** Code principal **************************************
+// ******************************************************** script principal ************************************************
 
-// fonction principale pour la page accueil
+// Execution du script
 
 displayProducts();
