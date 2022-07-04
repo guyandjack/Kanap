@@ -1,11 +1,14 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- *********************             site: Kanap             ****************************************************
- ******************* script permetant l' affichage des produits sur la page accueil**************************
+ *********************             site: Kanap  page: index.html           *************************************
+ 
+ *************     script permetant l' affichage de l' ensemble des produits sur la page accueil         *******
+
  **************************************************************************************************************
  **************************************************************************************************************/
 
-//****** déclaration des constantes globales ********
+
+ //****** déclaration des constantes globales ********
 
 const apiUrl = "http://localhost:3000/api/products";
 
@@ -98,8 +101,13 @@ function displayProducts() {
     });
 }
 
+// fonction global pour l' execution du script principal
+function runKanapIndex(){
+
+  displayProducts();
+}
+
 // ******************************************************** script principal ************************************************
 
 // Execution du script
-
-displayProducts();
+runKanapIndex();

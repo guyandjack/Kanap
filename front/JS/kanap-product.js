@@ -1,30 +1,26 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- *********************             site: Kanap             ****************************************************
- ******************* script permetant l' affichage des infos produits sur la page produit**********************
+ *********************             site: Kanap page: product.html            ****************************************************
+
+ ************      script partie n° 1 : Affichage des infos produits sur la page produit         *************
+ 
+ ***********       script partie n° 2 : Validation du pannier et enregidtrement dans le localstorage      ****
+
  **************************************************************************************************************
  **************************************************************************************************************/
+
+/*****************************************************************************************************************************
+ ****************************** script partie n° 1 : Affichage des infos produits sur la page produit***************************
+ *******************************************************************************************************************************/
 
 /*** constantes liées au DOM ************/
 const buttonCart = document.getElementById("addToCart");
 
-/*** variables de fonctionnement*** */
-
-// contient la valeur du local storage sous forme d' objet
-let cart;
-
-// Initialisation de la variable "cart" avec le local storage si un produit existe dans ce dernier
-if (window.localStorage.getItem("product") != null) {
-  cart = JSON.parse(window.localStorage.getItem("product"));
-} else {
-  cart = [];
-}
-
 /***** declaration des fonctions ****** */
 
-// permet de recuperer l'id du produit dans l' url
+// permet de recuperer l'id du produit dans l' url de la page
 
-function getDataUrl() {
+function getIdProductFromUrl() {
   try {
     let url = window.location.href;
     let urlValue = new URL(url);
@@ -48,7 +44,7 @@ function createImg(urlImg, textAlt) {
 
 // Implémente les données (nom, prix, description)  dans les éléments du DOM
 
-function insertDataText(name, price, desc) {
+function displayDataText(name, price, desc) {
   const productName = document.getElementById("title");
   const productPrice = document.getElementById("price");
   const productDescription = document.getElementById("description");
@@ -75,10 +71,10 @@ function createOption(arrayOfColors) {
 
 function displayDataProductById() {
   // obtient l' id du produit contenu dans l' url de la page courante
-  getDataUrl();
+  let idProduct = getIdProductFromUrl();
 
   // Requette sur l' API pour obtenir le produit seletionné
-  let apiUrl = "http://localhost:3000/api/products/" + idValue;
+  let apiUrl = "http://localhost:3000/api/products/" + idProduct;
   fetch(apiUrl)
     // Conversion au format Json des données recues de l' API
 
@@ -89,7 +85,7 @@ function displayDataProductById() {
     //implemente les donnees du produit selectionné dans le DOM
     .then(function (data) {
       createImg(data.imageUrl, data.altTxt);
-      insertDataText(data.name, data.price, data.description);
+      displayDataText(data.name, data.price, data.description);
       createOption(data.colors);
     })
 
@@ -100,7 +96,40 @@ function displayDataProductById() {
     });
 }
 
-// Stokage des informations du produit suite à un click sur le bouton "ajouter au panier"
+/*****************************************************************************************************************************
+ ****************************** script partie n° 2 : Validation du pannier et enregidtrement dans le localstorage  *************
+ *******************************************************************************************************************************/
+
+/*** variables de fonctionnement*** */
+
+// contient la valeur du local storage sous forme d' objet
+//let actualCart;
+
+// Initialisation de la variable "actualCart" avec le local storage si un produit existe dans ce dernier
+/*if (window.localStorage.getItem("product") != null) {
+  actualCart = JSON.parse(window.localStorage.getItem("product"));
+} else {
+  actualCart = [];
+}*/
+
+/****   declaration des fonctions ****/
+
+//initialisation du panier
+function initCart(){
+
+  // si un produit existe dans le local storage on initialise le panier actuel avec la valeur du local storage 
+
+  if (window.localStorage.getItem("product") != null) {
+    let actualCart = JSON.parse(window.localStorage.getItem("product"));
+    return actualCart
+  } 
+
+  //si le local storage est vide on initialise le panier avec un tableau vide
+  else {
+    let actualCart = [];
+    return actualCart
+  }
+}
 
 // recupere la quantite defini par l' utilisateur
 function getQuantity() {
@@ -117,70 +146,91 @@ function getColor() {
 }
 
 //enregistre les données du panier dans le local storage
-function saveCartInLocalStorage(arg) {
-  window.localStorage.setItem("product", JSON.stringify(arg));
+function saveCartInLocalStorage(actualCart) {
+  window.localStorage.setItem("product", JSON.stringify(actualCart));
 }
 
-/*//Verifie si le nouveau produit existe deja
-function checkNewProductIfAlreadyExist(newProduct, actualBucket) {
-  let exist = {
-    "ifexist": false,
-    "newqty": 0,
-    "indexitemexist": null
-  };
+//Verifie si le nouveau produit existe deja le panier actuel
+function checkNewProductIfAlreadyExist(newProduct, actualCart) {
+  
 
-  for (let i = 0; i < actualBucket.length; i++) {
-    if (
-      newProduct.id == actualBucket[i].id &&
-      newProduct.color == actualBucket[i].color
-    ) {
-      // Si le produit existe deja dans le panier actuel:
-      // un booelen passe true, recupere la qte du nouveau produit, recupere l' indexe du produit concerné dans le panier actuel
+  for (let i = 0; i < actualCart.length; i++) {
 
-      exist = {
+    console.log(newProduct.id);
+    console.log(actualCart[i].id);
+    console.log(newProduct.color);
+    console.log(actualCart[i].color);
 
-        "ifexist" : true,
-        "newqty" : newProduct.qty,
-        "indexitemexist" : i
-      };
-      break;
+    if (newProduct.id == actualCart[i].id && newProduct.color == actualCart[i].color) {
+
+      // Si le produit existe deja dans le panier actuel, retourne son indexe
+
+      return parseInt(i);
     }
+ 
+  }
+  return -1
+}
+
+// Enregistre le nouveau produit dans le panier lors du click sur le boutton "ajouter au panier"
+
+function pushToCart() {
+  // initialisation du panier
+  let actualCart = initCart();
+  console.log(actualCart);
+
+  // recupère la qte  ,la couleur choisi par l' utilisateur et l' id du produit
+  let qty = getQuantity();
+
+  // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
+  if (qty < 1) {
+    alert("Veuillez entrer une quantite strictement superieur à 0");
+    let inputBadValue = document.querySelector("input[name='itemQuantity']");
+    inputBadValue.value = 1;
+    return;
   }
 
-  return exist;
-}*/
-
-// enrgistre les produits, la qte, la couleur dans le panier
-function pushToCart() {
-  // recupere la qte et la couleur choisi par l' utilisateur
-  let qty = getQuantity();
   let color = getColor();
+  let productId = getIdProductFromUrl();
 
-  // nouveau produit
+  // nouveau produit à enregister dans le panier
   let newProductToPushInCart = {
-    id: idValue,
+    id: productId,
     qty: qty,
     color: color,
   };
 
-  console.log(cart);
   console.log(newProductToPushInCart);
 
-  // verifie si le produit existe deja dans le panier
-  let check = checkNewProductIfAlreadyExist(newProductToPushInCart, cart);
-  console.log(check);
+  // Si le panier actuel est vide on ajoute directement le nouveau produit
 
-  // si le nouveau produit n' existe pas on le rajoute au panier
-  if (check.ifexist == false) {
-    cart.push(newProductToPushInCart);
+  if (actualCart.length == 0) {
+    actualCart.push(newProductToPushInCart);
   }
-  // si il existe on modifie la quantite correspondant au produit du pannier existant
+
+  // si le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
   else {
-    cart[check.indexitemexist].qty =
-      parseInt(check.newqty) + parseInt(cart[check.indexitemexist].qty);
+    // retourne l' index du produit qui existe deja dans le panier actuel
+    let productIndexIfExist = checkNewProductIfAlreadyExist(
+      newProductToPushInCart,
+      actualCart
+    );
+    console.log(productIndexIfExist);
+
+    // si le nouveau produit n' existe pas deja dans le panier actuel on le rajoute
+    if (productIndexIfExist == -1) {
+      actualCart.push(newProductToPushInCart);
+    }
+
+    // si le nouveau produit existe deja dans le panier actuel on modifie la quantite en fonction de l' input utilisateur
+    else {
+      actualCart[productIndexIfExist].qty =
+        parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
+    }
   }
 
-  saveCartInLocalStorage(cart);
+  // Enregistrement du panier dans le local storage
+  saveCartInLocalStorage(actualCart);
 
   //redirection vers page panier
   window.location.href = "./cart.html";
@@ -189,7 +239,10 @@ function pushToCart() {
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
-  
+
+  //initialisatio du panier
+  initCart();
+
   // Affiche dans la page product, le produit selctionné par l' utilisteur .
 
   displayDataProductById();

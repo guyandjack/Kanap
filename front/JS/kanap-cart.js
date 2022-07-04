@@ -1,6 +1,6 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- ***********                       site: Kanap                                                 ****************
+ ***********                       site: Kanap  page: cart.html                                                ****************
  ***********          
  *********           script partie N°1: permet l' affichage du panier client                     *************
 
@@ -58,17 +58,17 @@ function createElementDivContainerAndImg(elementArticle, urlImg) {
 }
 
 // creation de l' element conteneur parent description , parametre
-function createElementDivMainContent(elementArticle) {
-  let divContainerMainContent = document.createElement("div");
-  divContainerMainContent.setAttribute("class", "cart__item__content");
-  elementArticle.appendChild(divContainerMainContent);
-  return divContainerMainContent;
+function createElementDivContent(elementArticle) {
+  let divContent = document.createElement("div");
+  divContent.setAttribute("class", "cart__item__content");
+  elementArticle.appendChild(divContent);
+  return divContent;
 }
 
 //creation de l' element conteneur description
 
 function createElementDivContainerDescription(
-  divContainerMainContent,
+  divContent,
   productName,
   productColor,
   productPrice
@@ -78,7 +78,7 @@ function createElementDivContainerDescription(
     "class",
     "cart__item__content__description"
   );
-  divContainerMainContent.appendChild(divContainerDescription);
+  divContent.appendChild(divContainerDescription);
 
   let pName = document.createElement("p");
   divContainerDescription.appendChild(pName);
@@ -95,10 +95,10 @@ function createElementDivContainerDescription(
 
 //creation de l' element conteneur parametre
 
-function createElementDivContainerSetting(divContainerMainContent) {
+function createElementDivContainerSetting(divContent) {
   let divContainerSetting = document.createElement("div");
   divContainerSetting.setAttribute("class", "cart__item__content__settings");
-  divContainerMainContent.appendChild(divContainerSetting);
+  divContent.appendChild(divContainerSetting);
   return divContainerSetting;
 }
 
@@ -155,7 +155,7 @@ function createElementDivContainerSetDelete(
   divContainerSetDelete.appendChild(deleteItem);
 
   deleteItem.addEventListener("click", function () {
-    deleteItemFromCartInDom(productId, productColor);
+    deleteItemFromCart(productId, productColor);
   });
 }
 
@@ -173,7 +173,7 @@ function displayOneItemInCart(
 
   createElementDivContainerAndImg(article, productImgUrl);
 
-  let mainContent = createElementDivMainContent(article);
+  let mainContent = createElementDivContent(article);
 
   createElementDivContainerDescription(
     mainContent,
@@ -195,7 +195,7 @@ function displayOneItemInCart(
 }
 
 
-// Mise à jour des totaux du panier  qte et prix 
+// Affichage des totaux du panier  qte et prix 
 
 function displayTotalPriceAndQuantity(){
 
@@ -233,13 +233,13 @@ function displayTotalPriceAndQuantity(){
 
         tabResult.totalprice += qtyValue * priceValue;
 
-        //affichage des totaux
-       divTotalQty.innerText = tabResult.totalqty;
-  
-       divTotalPrice.innerText = tabResult.totalprice;
-
-       console.log(tabResult)
       }
+      //affichage des totaux
+     divTotalQty.innerText = tabResult.totalqty;
+
+     divTotalPrice.innerText = tabResult.totalprice;
+
+     console.log(tabResult)
 
     }
     else {
@@ -256,6 +256,16 @@ function displayTotalPriceAndQuantity(){
 //fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
 function upDateCartIfQuantityChange(newqty, productId, productColor) {
+
+  // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
+  if (newqty < 1){
+
+    alert("Veuillez entrer une quantite strictement superieur à 0");
+    
+    return
+    
+    
+  }
   
   // recupere le panier du localstorage dans un tableau
   let cart = getCartInlocalStorage();
@@ -283,7 +293,7 @@ function upDateCartIfQuantityChange(newqty, productId, productColor) {
 
 // supprime un produit apres un click sur le bouton suprimer  
 
-function deleteItemFromCartInDom(productId, productColor){
+function deleteItemFromCart(productId, productColor){
 
   //supression dans le local storage
   let cart = getCartInlocalStorage();
@@ -324,10 +334,12 @@ function displayProductsInCart() {
   console.log(cart);
   
   // trie du tableau par id 
+  if (cart != null){
   cart.sort(function(a,b){
     return (a.id).localeCompare((b.id)) 
   })
   console.log(cart);
+  }
 
   // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
 
@@ -399,6 +411,8 @@ displayProductsInCart();
 /******************** script partie N°2: validation et contrôle des donnees issu du formulaire******************/
 
 // variable liees au DOM
+
+
 
 const form = document.querySelector(".cart__order__form");
 
@@ -574,14 +588,27 @@ function checkInputForm(inputValue, inputId){
 // function qui controle formulaire apres click sur bouton commander
 function checkValidityOfForm(evt) {
   
-  // bloque l' envoi du formulaire
+  // bloque l' envoi du formulaire pour l' execution des fonctions de controle
   evt.preventDefault();
-  alert("envoi du formulaire bloque");
+  //alert("envoi du formulaire bloque");
 
-  console.log(tabCheckInput)
+  //verifie si le panier n'est pas vide (apres suppression de tous les produits le panier peut etre vide)
+  let cart1 = getCartInlocalStorage();
+  console.log(cart1)
+
+  if (cart1 === null){
+
+    alert("impossible de passer commande votre panier est vide, redirection vers page accueil");
+
+    window.location.href = "./index.html";
+
+    return
+  }
+
+    console.log(tabCheckInput)
   
   // si aucun message d' erreur n' est trouve dans le dom on valide le formulaire
-  if(tabCheckInput.firstName && tabCheckInput.lastName && tabCheckInput.adrress && tabCheckInput.city && tabCheckInput.email){
+  //if(tabCheckInput.firstName && tabCheckInput.lastName && tabCheckInput.adrress && tabCheckInput.city && tabCheckInput.email){
 
     // objet contact à envoyer
     let contact = {
@@ -643,13 +670,13 @@ function checkValidityOfForm(evt) {
     .catch(function (err) {
           alert("il s'est produit une erreur: " + err);
         });
-  }
-
-  else{
-    alert("Commande non envoyée, veuillez remplir correctement le formulaire")
-  }
-  
 }
+
+  /*else{
+    alert("Commande non envoyée, veuillez remplir correctement le formulaire")
+  }*/
+  
+
   
 
 inputFirstName.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
