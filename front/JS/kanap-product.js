@@ -154,7 +154,7 @@ function saveCartInLocalStorage(actualCart) {
 function checkNewProductIfAlreadyExist(newProduct, actualCart) {
   
 
-  for (let i = 0; i < actualCart.length; i++) {
+  for (let i in actualCart) {
 
     console.log(newProduct.id);
     console.log(actualCart[i].id);

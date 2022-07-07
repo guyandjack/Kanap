@@ -130,8 +130,18 @@ function createElementDivContainerSetQty(
   inputSetQty.setAttribute("value", productQty);
   divContainerSetQty.appendChild(inputSetQty);
 
-  inputSetQty.addEventListener("change", function () {
-    upDateCartIfQuantityChange(this.value, productId, productColor);
+  inputSetQty.addEventListener("change", function (evt) {
+
+    let qty = upDateCartIfQuantityChange(this.value, productId, productColor);
+
+    if(qty < 1) {
+      evt.target.style.border = "2px solid red";
+    }
+    else{
+      evt.target.style.border = "2px solid transparent";
+
+    }
+    
   });
 }
 
@@ -261,8 +271,8 @@ function upDateCartIfQuantityChange(newqty, productId, productColor) {
   if (newqty < 1){
 
     alert("Veuillez entrer une quantite strictement superieur à 0");
-    
-    return
+
+    return newqty
     
     
   }
@@ -450,12 +460,12 @@ const buttonOrder = document.getElementById("order");
   const errorMsgWrongAlphanumerical =  "Ce champ doit comporter uniquement des caracteres alphanumeriques";
   const errorMsgWrongEmail =  "Ce champ doit comporter une adresse email valide";
 
-// Objet litteral indiquant la validation des inputs
+// Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
 let tabCheckInput = {
   "firstName" : null,
   "lastName" : null,
-  "adrress" : null,
+  "address" : null,
   "city" : null,
   "email" : null
 }
@@ -464,55 +474,82 @@ let tabCheckInput = {
 
 /**** declaration des fonctions *****/
 
+// Affiche une alerte et redirige vers la page accueil si le panier est vide
+function checkIfCartIsnNotEmpty(){
+  
+  let cart = getCartInlocalStorage();
+  console.log(cart)
+
+  if (cart.length > 0){
+    return true
+  }
+
+  alert(
+    "impossible de passer commande votre panier est vide, redirection vers page accueil"
+  );
+
+  window.location.href = "./index.html";
+
+  return false;
+  
+}
 
 
+// determine les expressions régulieres de comparaison en fonction de l' input utilisée
 
-// determine le regEx en fonction de l' input utilisé
 function setRegEx(inputId){
 
-  if (inputId == "firstName" || inputId == "lastName" || inputId == "city") {
+  let regEx = null;
 
-    regEx = regExAlphabetical;
-    
-  } 
-  else if (inputId == "address") {
-    
-    regEx = regExAlphanumeric
-    
-  } 
-  else if (inputId == "email") {
-    
-    
-    regEx = regExEmail
-    
+  switch(inputId){
+
+    case "firstName" : 
+    case "lastName" :
+    case "city" :
+      regEx = regExAlphabetical;
+      break
+
+    case "address":
+      regEx = regExAlphanumeric;
+      break
+
+    case "email" :
+      regEx = regExEmail;
+      break
+
+
   }
   return regEx
 }
 
-// determine les messages d' erreur en fonction de l' input utilisée
+// determine les messages d' erreur à afficher en fonction de l' input utilisée
+
 function setErrorMessage(inputId){
 
-  if (inputId == "firstName" || inputId == "lastName" || inputId == "city") {
+  let errorMessage = null;
 
+  switch(inputId){
+    case "firstName":
+    case "lastName":
+    case "cityName":
+      errorMessage = errorMsgWrongAlphabetical;
+      break
+
+    case "address" :
+      errorMessage = errorMsgWrongAlphanumerical;
+      break
     
-    errorMessageWrong = errorMsgWrongAlphabetical;
-    
-  } 
-  else if (inputId == "address") {
-    
-    errorMessageWrong = errorMsgWrongAlphanumerical;
-    
-  } 
-  else if (inputId == "email") {
-    
-    
-    errorMessageWrong = errorMsgWrongEmail;
+    case "email" :
+      errorMessage = errorMsgWrongEmail;
+      break
     
   }
-  return errorMessageWrong
+
+  return errorMessage
 }
 
-// determine l' element cible oû sera afficher le message d' erreur
+// determine l' element html oû sera afficher le message d' erreur
+
 function targetContainerForErrorMessage(inputId){
 
   let containerErrorMessage;
@@ -545,6 +582,7 @@ function targetContainerForErrorMessage(inputId){
 }
 
 // teste la validite d' une input utilisateur 
+
 function checkInputForm(inputValue, inputId){
 
   let regEx = setRegEx(inputId);
@@ -556,8 +594,8 @@ function checkInputForm(inputValue, inputId){
     containerErrorMessage.innerText = errorMessage;
     inputForm.style.border = "2px solid red";
     
-     tabCheckInput.inputId = false;
-     return tabCheckInput.inputId
+     tabCheckInput[inputId] = false;
+     return tabCheckInput[inputId]
     
 
   } 
@@ -565,8 +603,8 @@ function checkInputForm(inputValue, inputId){
     containerErrorMessage.innerText = errorMsgMiss;
     inputForm.style.border = "2px solid red";
 
-   tabCheckInput.inputId = false;
-   return tabCheckInput.inputId;
+   tabCheckInput[inputId] = false;
+   return tabCheckInput[inputId];
 
 
   }
@@ -574,9 +612,8 @@ function checkInputForm(inputValue, inputId){
     containerErrorMessage.innerText = null;
     inputForm.style.border = "2px solid green";
     
-    tabCheckInput.inputId = true;
-    console.log( tabCheckInput);
-    return tabCheckInput.inputId;
+    tabCheckInput[inputId] = true;
+    return tabCheckInput[inputId];
     
      
   }
@@ -585,104 +622,99 @@ function checkInputForm(inputValue, inputId){
 
 
 
-// function qui controle formulaire apres click sur bouton commander
+//  controle du formulaire apres un click sur le bouton commander
+
 function checkValidityOfForm(evt) {
   
   // bloque l' envoi du formulaire pour l' execution des fonctions de controle
   evt.preventDefault();
-  //alert("envoi du formulaire bloque");
-
-  //verifie si le panier n'est pas vide (apres suppression de tous les produits le panier peut etre vide)
-  let cart1 = getCartInlocalStorage();
-  console.log(cart1)
-
-  if (cart1 === null){
-
-    alert("impossible de passer commande votre panier est vide, redirection vers page accueil");
-
-    window.location.href = "./index.html";
-
-    return
-  }
-
-    console.log(tabCheckInput)
   
-  // si aucun message d' erreur n' est trouve dans le dom on valide le formulaire
-  //if(tabCheckInput.firstName && tabCheckInput.lastName && tabCheckInput.adrress && tabCheckInput.city && tabCheckInput.email){
+  //verifie si le panier n'est pas vide (apres suppression de tous les produits le panier peut etre vide)
+  let valid = checkIfCartIsnNotEmpty();
+  console.log(valid)
 
-    // objet contact à envoyer
-    let contact = {
-      firstName: inputFirstName.value,
-      lastName: inputLastName.value,
-      address: inputAddress.value,
-      city: inputCity.value,
-      email: inputEmail.value
-    };
-    
-    console.log(typeof inputFirstName.value)
+  // si valid est different de true le panier est vide, on sort de la fonction
+  if(!valid){ 
+    return
+  }  
 
-    console.log(contact)
+    // controle de la validite des inputs du formulaire
+    if(tabCheckInput.firstName && tabCheckInput.lastName && tabCheckInput.address && tabCheckInput.city && tabCheckInput.email){
 
-    // tableau de produit-id à envoyer
-    let cart = getCartInlocalStorage();
-    let products = [];
-
-    for (let item of  cart){
-       
-      products.push(item.id)
-    }
-
-    console.log(products)
+      // objet contact à envoyer vers l' API
+      let contact = {
+        firstName: inputFirstName.value,
+        lastName: inputLastName.value,
+        address: inputAddress.value,
+        city: inputCity.value,
+        email: inputEmail.value
+      };
       
+      // tableau de produit-id à envoyer vers 
 
-      let bodyRequest = {
-        "contact" : contact,
-        "products" : products
+      let cart = getCartInlocalStorage();
+      let products = [];
+
+      for (let item of  cart){
+        
+        products.push(item.id)
+      }
+
+      console.log(products)
+        
+
+        let bodyRequest = {
+          "contact" : contact,
+          "products" : products
+        };
+
+        // formatage json pour le fetch post
+        let jsonBodyRequest = JSON.stringify(bodyRequest);
+
+      //requette post vers l 'API
+
+      const apiUrl = "http://localhost:3000/api/products/order";
+
+      const setFetch = {
+        method: "POST",
+        body: jsonBodyRequest,
+        headers : {
+          "content-Type" : "application/json",
+        }
       };
 
-      // formatage json pour le fetch post
-      let jsonBodyRequest = JSON.stringify(bodyRequest);
+      fetch(apiUrl,setFetch)
+      
+      .then(function (res) {
+        return res.json();
+      })
 
-    //requette post vers l 'API
+      .then(function(data){
 
-    const apiUrl = "http://localhost:3000/api/products/order";
+        let idOrder = data.orderId;
+        window.location.href = "./confirmation.html?orderId=" + idOrder;
+      })
 
-    const setFetch = {
-      method: "POST",
-      body: jsonBodyRequest,
-      headers : {
-        "content-Type" : "application/json",
-      }
-    };
+      .catch(function (err) {
+            alert("il s'est produit une erreur: " + err);
+          });
+    }
 
-    fetch(apiUrl,setFetch)
-    
-    .then(function (res) {
-      return res.json();
-    })
-
-    .then(function(data){
-
-      let idOrder = data.orderId;
-      window.location.href = "./confirmation.html?orderId=" + idOrder;
-    })
-
-    .catch(function (err) {
-          alert("il s'est produit une erreur: " + err);
-        });
+    alert("Commande non envoyée, veuillez remplir correctement tous les champs du formulaire")
+    return
+  
+  
 }
-
-  /*else{
-    alert("Commande non envoyée, veuillez remplir correctement le formulaire")
-  }*/
   
 
   
-
+// ecouteur d' évènement qui lance les fonctions de controle du formulaire
 inputFirstName.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
 inputLastName.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
 inputAddress.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
 inputCity.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
 inputEmail.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
+
+
 
 buttonOrder.addEventListener("click",  checkValidityOfForm );
