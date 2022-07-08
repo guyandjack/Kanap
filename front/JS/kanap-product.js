@@ -100,17 +100,7 @@ function displayDataProductById() {
  ****************************** script partie n° 2 : Validation du pannier et enregidtrement dans le localstorage  *************
  *******************************************************************************************************************************/
 
-/*** variables de fonctionnement*** */
 
-// contient la valeur du local storage sous forme d' objet
-//let actualCart;
-
-// Initialisation de la variable "actualCart" avec le local storage si un produit existe dans ce dernier
-/*if (window.localStorage.getItem("product") != null) {
-  actualCart = JSON.parse(window.localStorage.getItem("product"));
-} else {
-  actualCart = [];
-}*/
 
 /****   declaration des fonctions ****/
 
@@ -138,12 +128,53 @@ function getQuantity() {
   return qtyProductsValue;
 }
 
+// Controle si la quantite entree par l' utilisateur est valide (positive)
+function checkIfQuantityIsValid(qty){
+  
+  let inputQty = document.querySelector("input[name='itemQuantity']");
+
+  if (qty < 1) {
+
+    alert("Veuillez entrer une quantite strictement superieur à 0");
+    inputQty.style.border = "2px solid red";
+    
+
+    return -1
+  }
+
+  inputQty.style.border = "2px solid transparent";
+  return true
+
+}
+
 // recupere la couleur defini par l' utilisateur
 function getColor() {
   const colorProduct = document.getElementById("colors");
   let colorProductValue = colorProduct.value;
   return colorProductValue;
 }
+
+// controle si une couleur valide a été selectionné par l' utilisateur
+  function checkIfColorisSelected(color){
+  
+  let selectQty = document.getElementById("colors");
+  let arrayOfOptionColor = document.querySelectorAll("option");
+  console.log(arrayOfOptionColor);
+
+  for (option of arrayOfOptionColor){
+   
+    if(color == option.innerText){
+      selectQty.style.border = "2px solid transparent";
+      return true
+    }
+
+  }
+  alert("veuillez selectionner une couleur dans la liste proposée");
+  selectQty.style.border = "2px solid red";
+  
+  return -1
+
+  }
 
 //enregistre les données du panier dans le local storage
 function saveCartInLocalStorage(actualCart) {
@@ -156,11 +187,6 @@ function checkNewProductIfAlreadyExist(newProduct, actualCart) {
 
   for (let i in actualCart) {
 
-    console.log(newProduct.id);
-    console.log(actualCart[i].id);
-    console.log(newProduct.color);
-    console.log(actualCart[i].color);
-
     if (newProduct.id == actualCart[i].id && newProduct.color == actualCart[i].color) {
 
       // Si le produit existe deja dans le panier actuel, retourne son indexe
@@ -169,12 +195,14 @@ function checkNewProductIfAlreadyExist(newProduct, actualCart) {
     }
  
   }
+  // Si le produit n'existe pas on retourne -1
   return -1
 }
 
 // Enregistre le nouveau produit dans le panier lors du click sur le boutton "ajouter au panier"
 
 function pushToCart() {
+
   // initialisation du panier
   let actualCart = initCart();
   console.log(actualCart);
@@ -182,15 +210,22 @@ function pushToCart() {
   // recupère la qte  ,la couleur choisi par l' utilisateur et l' id du produit
   let qty = getQuantity();
 
-  // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
-  if (qty < 1) {
-    alert("Veuillez entrer une quantite strictement superieur à 0");
-    let inputBadValue = document.querySelector("input[name='itemQuantity']");
-    inputBadValue.value = 1;
-    return;
+  // controle si la quantite entree par l' utilisateur est valide
+  let ifQuantityValid = checkIfQuantityIsValid(qty);
+  if (ifQuantityValid == -1){
+    return
   }
 
   let color = getColor();
+  console.log(color)
+
+  // controle si une couleur valide a été selectionné par l' utilisateur
+  let ifColorValid = checkIfColorisSelected(color);
+  if(ifColorValid == -1){
+    return
+  }
+  console.log(ifColorValid)
+
   let productId = getIdProductFromUrl();
 
   // nouveau produit à enregister dans le panier
@@ -204,36 +239,33 @@ function pushToCart() {
 
   // Si le panier actuel est vide on ajoute directement le nouveau produit
 
-  if (actualCart.length == 0) {
+  if (actualCart.length === 0) {
     actualCart.push(newProductToPushInCart);
+
   }
 
-  // si le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
-  else {
-    // retourne l' index du produit qui existe deja dans le panier actuel
-    let productIndexIfExist = checkNewProductIfAlreadyExist(
-      newProductToPushInCart,
-      actualCart
-    );
-    console.log(productIndexIfExist);
+  //  le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
+  else{
+    // retourne l' index du produit deja existant dans le panier actuel
+    let productIndexIfExist = checkNewProductIfAlreadyExist(newProductToPushInCart, actualCart );
 
     // si le nouveau produit n' existe pas deja dans le panier actuel on le rajoute
     if (productIndexIfExist == -1) {
       actualCart.push(newProductToPushInCart);
+      
     }
 
     // si le nouveau produit existe deja dans le panier actuel on modifie la quantite en fonction de l' input utilisateur
     else {
-      actualCart[productIndexIfExist].qty =
-        parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
+      actualCart[productIndexIfExist].qty = parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
     }
   }
-
+  // verifie
   // Enregistrement du panier dans le local storage
   saveCartInLocalStorage(actualCart);
 
   //redirection vers page panier
-  window.location.href = "./cart.html";
+  //window.location.href = "./cart.html";
 }
 
 // fonction globale pour l' execution du script principal
