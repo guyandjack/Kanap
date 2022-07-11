@@ -406,13 +406,7 @@ function displayProductsInCart() {
   }
 }
 
-/*************************************************************************************************************
- * *************** code principal pour partie 1 ************************************************************/
-/********************************************************************************************************* */
 
-//fonction global qui affiche le contenu du panier
-
-displayProductsInCart();
 
 
 
@@ -699,6 +693,7 @@ function checkValidityOfForm(evt) {
             alert("il s'est produit une erreur: " + err);
           });
     }
+    
     // Indique à l'utilisateur quel champ du formulaire  est mal rempli 
     
     // declenche les event des inputs
@@ -719,6 +714,9 @@ function checkValidityOfForm(evt) {
 
   
 // ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire
+function listenerEvent(){
+
+
 inputFirstName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
 inputLastName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
 inputAddress.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
@@ -728,3 +726,22 @@ inputEmail.addEventListener("input", function(){ checkInputFromForm(this.value, 
 
 
 buttonOrder.addEventListener("click",  checkValidityOfForm );
+
+}
+
+
+
+
+// function globale pour l' execution du script principal
+
+function runKanapCart(){
+
+  displayProductsInCart();
+  listenerEvent();
+
+}
+
+
+/**************************************** script principal**************************************** */
+
+runKanapCart();
