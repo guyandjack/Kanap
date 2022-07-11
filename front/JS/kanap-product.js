@@ -1,16 +1,16 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- *********************             site: Kanap page: product.html            ****************************************************
+ *********************             site: Kanap / page: product.html            *********************************
 
- ************      script partie n° 1 : Affichage des infos produits sur la page produit         *************
+ ************ script partie n° 1 : Affiche le produit et ses informations  ***********************************
  
- ***********       script partie n° 2 : Validation du pannier et enregidtrement dans le localstorage      ****
+ ***********  script partie n° 2 : Validation du pannier et enregistrement dans le localstorage      ****
 
  **************************************************************************************************************
  **************************************************************************************************************/
 
 /*****************************************************************************************************************************
- ****************************** script partie n° 1 : Affichage des infos produits sur la page produit***************************
+ ****************************** script partie n° 1 : Affiche le produit et ses informations ***************************
  *******************************************************************************************************************************/
 
 /*** constantes liées au DOM ************/
@@ -18,7 +18,7 @@ const buttonCart = document.getElementById("addToCart");
 
 /***** declaration des fonctions ****** */
 
-// permet de recuperer l'id du produit dans l' url de la page
+// permet de recuperer l'id du produit dans l' url de la page courante
 
 function getIdProductFromUrl() {
   try {
@@ -42,7 +42,7 @@ function createImg(urlImg, textAlt) {
   containerImg.appendChild(newImg);
 }
 
-// Implémente les données (nom, prix, description)  dans les éléments du DOM
+// Affiche les données (nom, prix, description)  dans les éléments du DOM
 
 function displayDataText(name, price, desc) {
   const productName = document.getElementById("title");
@@ -54,7 +54,7 @@ function displayDataText(name, price, desc) {
   productDescription.innerText = desc;
 }
 
-// Crée les element option dans le DOM  permetant le choix de la couleur par l' utilisateur
+// Crée les elements "option" dans le DOM , permetant le choix de la couleur par l' utilisateur
 
 function createOption(arrayOfColors) {
   const select = document.getElementById("colors");
@@ -67,9 +67,10 @@ function createOption(arrayOfColors) {
   }
 }
 
-// Fonction principale  permetant l' affichage des données correspondant au produit selectionné sur la page accueil
+// Affichage des données correspondant au produit selectionné sur la page accueil
 
 function displayDataProductById() {
+
   // obtient l' id du produit contenu dans l' url de la page courante
   let idProduct = getIdProductFromUrl();
 
@@ -96,8 +97,10 @@ function displayDataProductById() {
     });
 }
 
+
+
 /*****************************************************************************************************************************
- ****************************** script partie n° 2 : Validation du pannier et enregidtrement dans le localstorage  *************
+ ****************************** script partie n° 2 : Validation du pannier et enregistrement dans le localstorage  *************
  *******************************************************************************************************************************/
 
 
@@ -123,6 +126,7 @@ function initCart(){
 
 // recupere la quantite defini par l' utilisateur
 function getQuantity() {
+
   const qtyProducts = document.getElementById("quantity");
   let qtyProductsValue = parseInt(qtyProducts.value);
   return qtyProductsValue;
@@ -149,6 +153,7 @@ function checkIfQuantityIsValid(qty){
 
 // recupere la couleur defini par l' utilisateur
 function getColor() {
+
   const colorProduct = document.getElementById("colors");
   let colorProductValue = colorProduct.value;
   return colorProductValue;
@@ -181,7 +186,13 @@ function saveCartInLocalStorage(actualCart) {
   window.localStorage.setItem("product", JSON.stringify(actualCart));
 }
 
-//Verifie si le nouveau produit existe deja le panier actuel
+// redirige l' utilisateur vers la page panier
+function locationToCartPage(){
+  window.location.href = "./cart.html";
+}
+
+
+//Verifie si le nouveau produit existe deja dans le panier actuel
 function checkNewProductIfAlreadyExist(newProduct, actualCart) {
   
 
@@ -207,7 +218,7 @@ function pushToCart() {
   let actualCart = initCart();
   console.log(actualCart);
 
-  // recupère la qte  ,la couleur choisi par l' utilisateur et l' id du produit
+  // recupère la qte  choisi par l' utilisateur
   let qty = getQuantity();
 
   // controle si la quantite entree par l' utilisateur est valide
@@ -216,6 +227,7 @@ function pushToCart() {
     return
   }
 
+  // recupere la couleur choisi par l' utilisateur
   let color = getColor();
   console.log(color)
 
@@ -226,9 +238,10 @@ function pushToCart() {
   }
   console.log(ifColorValid)
 
+  // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
 
-  // nouveau produit à enregister dans le panier
+  // objet textuel representant le nouveau produit à enregister dans le panier
   let newProductToPushInCart = {
     id: productId,
     qty: qty,
@@ -240,12 +253,17 @@ function pushToCart() {
   // Si le panier actuel est vide on ajoute directement le nouveau produit
 
   if (actualCart.length === 0) {
-    actualCart.push(newProductToPushInCart);
 
+    actualCart.push(newProductToPushInCart);
+    // Enregistrement du panier dans le local storage
+    saveCartInLocalStorage(actualCart);
+    //redirection vers page panier
+    locationToCartPage();
+    return;
   }
 
   //  le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
-  else{
+  
     // retourne l' index du produit deja existant dans le panier actuel
     let productIndexIfExist = checkNewProductIfAlreadyExist(newProductToPushInCart, actualCart );
 
@@ -259,22 +277,20 @@ function pushToCart() {
     else {
       actualCart[productIndexIfExist].qty = parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
     }
-  }
-  // verifie
+  
+  
   // Enregistrement du panier dans le local storage
   saveCartInLocalStorage(actualCart);
-
   //redirection vers page panier
-  //window.location.href = "./cart.html";
+  locationToCartPage();
+
 }
 
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
 
-  //initialisatio du panier
-  initCart();
-
+  
   // Affiche dans la page product, le produit selctionné par l' utilisteur .
 
   displayDataProductById();

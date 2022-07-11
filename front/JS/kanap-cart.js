@@ -583,7 +583,7 @@ function targetContainerForErrorMessage(inputId){
 
 // teste la validite d' une input utilisateur 
 
-function checkInputForm(inputValue, inputId){
+function checkInputFromForm(inputValue, inputId){
 
   let regEx = setRegEx(inputId);
   let errorMessage = setErrorMessage(inputId);
@@ -699,8 +699,18 @@ function checkValidityOfForm(evt) {
             alert("il s'est produit une erreur: " + err);
           });
     }
-
-    alert("Commande non envoyée, veuillez remplir correctement tous les champs du formulaire")
+    // Indique à l'utilisateur quel champ du formulaire  est mal rempli 
+    
+    // declenche les event des inputs
+    const event = new Event ("input")
+    inputFirstName.dispatchEvent(event);
+    inputLastName.dispatchEvent(event);
+    inputAddress.dispatchEvent(event);
+    inputCity.dispatchEvent(event);
+    inputEmail.dispatchEvent(event);
+      alert(
+        "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
+      );
     return
   
   
@@ -708,12 +718,12 @@ function checkValidityOfForm(evt) {
   
 
   
-// ecouteur d' évènement qui lance les fonctions de controle du formulaire
-inputFirstName.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
-inputLastName.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
-inputAddress.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
-inputCity.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
-inputEmail.addEventListener("input", function(){ checkInputForm(this.value, this.id)});
+// ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire
+inputFirstName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
+inputLastName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
+inputAddress.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
+inputCity.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
+inputEmail.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
 
 
 
