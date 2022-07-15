@@ -176,13 +176,14 @@ function locationToCartPage() {
 }
 
 //Verifie si le nouveau produit existe deja dans le panier actuel
-function checkNewProductIfAlreadyExist(newProduct, actualCart) {
+function isNewProductAlreadyExist(newProduct, actualCart) {
   for (let i in actualCart) {
+
+    // Si le produit existe deja dans le panier actuel, retourne son indexe
     if (
       newProduct.id == actualCart[i].id &&
       newProduct.color == actualCart[i].color
     ) {
-      // Si le produit existe deja dans le panier actuel, retourne son indexe
 
       return parseInt(i);
     }
@@ -212,28 +213,28 @@ function pushToCart() {
   console.log(color);
 
   // controle si une couleur valide a été selectionné par l' utilisateur
-  let ifColorValid = validateColor(color);
-  if (!ifColorValid) {
+  let colorValid = validateColor(color);
+  if (!colorValid) {
     return;
   }
-  console.log(ifColorValid);
+  console.log(colorValid);
 
   // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
 
   // objet textuel representant le nouveau produit à enregister dans le panier
   let newProductToPushInCart = {
-    id: productId,
-    qty: qty,
-    color: color,
+    "id": productId,
+    "qty": qty,
+    "color": color,
   };
 
   console.log(newProductToPushInCart);
 
-  //  le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
+  
 
   // retourne l' index du produit deja existant dans le panier actuel
-  let productIndexIfExist = checkNewProductIfAlreadyExist(
+  let productIndexIfExist = isNewProductAlreadyExist(
     newProductToPushInCart,
     actualCart
   );
@@ -269,5 +270,5 @@ function runKanapProduct() {
 
 /********************************************** script principal  *********************************************/
 
-// execution du script
+// execution du script principal
 runKanapProduct();
