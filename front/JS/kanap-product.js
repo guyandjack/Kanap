@@ -70,7 +70,6 @@ function createOption(arrayOfColors) {
 // Affichage des données correspondant au produit selectionné sur la page accueil
 
 function displayDataProductById() {
-
   // obtient l' id du produit contenu dans l' url de la page courante
   let idProduct = getIdProductFromUrl();
 
@@ -97,89 +96,74 @@ function displayDataProductById() {
     });
 }
 
-
-
 /*****************************************************************************************************************************
  ****************************** script partie n° 2 : Validation du pannier et enregistrement dans le localstorage  *************
  *******************************************************************************************************************************/
 
-
-
 /****   declaration des fonctions ****/
 
 //initialisation du panier
-function initCart(){
-
-  // si un produit existe dans le local storage on initialise le panier actuel avec la valeur du local storage 
+function initCart() {
+  // si un produit existe dans le local storage on initialise le panier actuel avec la valeur du local storage
 
   if (window.localStorage.getItem("product") != null) {
     let actualCart = JSON.parse(window.localStorage.getItem("product"));
-    return actualCart
-  } 
+    return actualCart;
+  }
 
   //si le local storage est vide on initialise le panier avec un tableau vide
   else {
     let actualCart = [];
-    return actualCart
+    return actualCart;
   }
 }
 
 // recupere la quantite defini par l' utilisateur
 function getQuantity() {
-
   const qtyProducts = document.getElementById("quantity");
   let qtyProductsValue = parseInt(qtyProducts.value);
   return qtyProductsValue;
 }
 
 // Controle si la quantite entree par l' utilisateur est valide (positive)
-function checkIfQuantityIsValid(qty){
-  
+function validateQuantity(qty) {
   let inputQty = document.querySelector("input[name='itemQuantity']");
 
   if (qty < 1) {
-
     alert("Veuillez entrer une quantite strictement superieur à 0");
     inputQty.style.border = "2px solid red";
-    
 
-    return -1
+    return false;
   }
 
   inputQty.style.border = "2px solid transparent";
-  return true
-
+  return true;
 }
 
 // recupere la couleur defini par l' utilisateur
 function getColor() {
-
   const colorProduct = document.getElementById("colors");
   let colorProductValue = colorProduct.value;
   return colorProductValue;
 }
 
 // controle si une couleur valide a été selectionné par l' utilisateur
-  function checkIfColorisSelected(color){
-  
-  let selectQty = document.getElementById("colors");
+function validateColor(color) {
+  let selectColor = document.getElementById("colors");
   let arrayOfOptionColor = document.querySelectorAll("option");
   console.log(arrayOfOptionColor);
 
-  for (option of arrayOfOptionColor){
-   
-    if(color == option.innerText){
-      selectQty.style.border = "2px solid transparent";
-      return true
+  for (option of arrayOfOptionColor) {
+    if (color == option.innerText) {
+      selectColor.style.border = "2px solid transparent";
+      return true;
     }
-
   }
   alert("veuillez selectionner une couleur dans la liste proposée");
-  selectQty.style.border = "2px solid red";
-  
-  return -1
+  selectColor.style.border = "2px solid red";
 
-  }
+  return false;
+}
 
 //enregistre les données du panier dans le local storage
 function saveCartInLocalStorage(actualCart) {
@@ -187,33 +171,29 @@ function saveCartInLocalStorage(actualCart) {
 }
 
 // redirige l' utilisateur vers la page panier
-function locationToCartPage(){
+function locationToCartPage() {
   window.location.href = "./cart.html";
 }
 
-
 //Verifie si le nouveau produit existe deja dans le panier actuel
 function checkNewProductIfAlreadyExist(newProduct, actualCart) {
-  
-
   for (let i in actualCart) {
-
-    if (newProduct.id == actualCart[i].id && newProduct.color == actualCart[i].color) {
-
+    if (
+      newProduct.id == actualCart[i].id &&
+      newProduct.color == actualCart[i].color
+    ) {
       // Si le produit existe deja dans le panier actuel, retourne son indexe
 
       return parseInt(i);
     }
- 
   }
   // Si le produit n'existe pas on retourne -1
-  return -1
+  return -1;
 }
 
 // Enregistre le nouveau produit dans le panier lors du click sur le boutton "ajouter au panier"
 
 function pushToCart() {
-
   // initialisation du panier
   let actualCart = initCart();
   console.log(actualCart);
@@ -222,21 +202,21 @@ function pushToCart() {
   let qty = getQuantity();
 
   // controle si la quantite entree par l' utilisateur est valide
-  let ifQuantityValid = checkIfQuantityIsValid(qty);
-  if (ifQuantityValid == -1){
-    return
+  let quantityValid = validateQuantity(qty);
+  if (!quantityValid) {
+    return;
   }
 
   // recupere la couleur choisi par l' utilisateur
   let color = getColor();
-  console.log(color)
+  console.log(color);
 
   // controle si une couleur valide a été selectionné par l' utilisateur
-  let ifColorValid = checkIfColorisSelected(color);
-  if(ifColorValid == -1){
-    return
+  let ifColorValid = validateColor(color);
+  if (!ifColorValid) {
+    return;
   }
-  console.log(ifColorValid)
+  console.log(ifColorValid);
 
   // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
@@ -250,47 +230,34 @@ function pushToCart() {
 
   console.log(newProductToPushInCart);
 
-  // Si le panier actuel est vide on ajoute directement le nouveau produit
+  //  le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
 
-  if (actualCart.length === 0) {
+  // retourne l' index du produit deja existant dans le panier actuel
+  let productIndexIfExist = checkNewProductIfAlreadyExist(
+    newProductToPushInCart,
+    actualCart
+  );
 
+  // si le nouveau produit n' existe pas deja dans le panier actuel on le rajoute
+  if (productIndexIfExist == -1) {
     actualCart.push(newProductToPushInCart);
-    // Enregistrement du panier dans le local storage
-    saveCartInLocalStorage(actualCart);
-    //redirection vers page panier
-    locationToCartPage();
-    return;
   }
 
-  //  le panier actuel contient au moins un produit ,on compare le nouveau produit aux produits existant
-  
-    // retourne l' index du produit deja existant dans le panier actuel
-    let productIndexIfExist = checkNewProductIfAlreadyExist(newProductToPushInCart, actualCart );
+  // si le nouveau produit existe deja dans le panier actuel on modifie la quantite en fonction de l' input utilisateur
+  else {
+    actualCart[productIndexIfExist].qty =
+      parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
+  }
 
-    // si le nouveau produit n' existe pas deja dans le panier actuel on le rajoute
-    if (productIndexIfExist == -1) {
-      actualCart.push(newProductToPushInCart);
-      
-    }
-
-    // si le nouveau produit existe deja dans le panier actuel on modifie la quantite en fonction de l' input utilisateur
-    else {
-      actualCart[productIndexIfExist].qty = parseInt(qty) + parseInt(actualCart[productIndexIfExist].qty);
-    }
-  
-  
   // Enregistrement du panier dans le local storage
   saveCartInLocalStorage(actualCart);
   //redirection vers page panier
   locationToCartPage();
-
 }
 
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
-
-  
   // Affiche dans la page product, le produit selctionné par l' utilisteur .
 
   displayDataProductById();

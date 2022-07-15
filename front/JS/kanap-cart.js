@@ -1,6 +1,6 @@
 /**************************************************************************************************************
  **************************************************************************************************************
- ***********                       site: Kanap  page: cart.html                                                ****************
+ ***********                       site: Kanap  page: cart.html                               ****************
  ***********          
  *********           script partie N°1: permet l' affichage du panier client                     *************
 
@@ -9,11 +9,9 @@
  **************************************************************************************************************
  **************************************************************************************************************/
 
-
 /***************************************************************************************************************
 /*************** script partie N°1: permet l' affichage du panier client ***************************************
  **************************************************************************************************************/
-
 
 /******* constante globales    *****
  * *********************************/
@@ -22,8 +20,6 @@ const sectionItems = document.getElementById("cart__items");
 
 /**** declaration des fonctions *****
  * **********************************/
-
-
 
 // Recupere les produits du panier dans le local storage
 
@@ -131,17 +127,13 @@ function createElementDivContainerSetQty(
   divContainerSetQty.appendChild(inputSetQty);
 
   inputSetQty.addEventListener("change", function (evt) {
-
     let qty = upDateCartIfQuantityChange(this.value, productId, productColor);
 
-    if(qty < 1) {
+    if (qty < 1) {
       evt.target.style.border = "2px solid red";
-    }
-    else{
+    } else {
       evt.target.style.border = "2px solid transparent";
-
     }
-    
   });
 }
 
@@ -204,16 +196,12 @@ function displayOneItemInCart(
   createElementDivContainerSetDelete(containerSetting, productId, productColor);
 }
 
+// Affichage des totaux du panier  qte et prix
 
-// Affichage des totaux du panier  qte et prix 
-
-function displayTotalPriceAndQuantity(){
-
- 
+function displayTotalPriceAndQuantity() {
   let tabOfItem = document.querySelectorAll("article.cart__item");
   console.log(tabOfItem);
 
-  
   let tabResult = {
     totalqty: null,
     totalprice: null,
@@ -222,72 +210,53 @@ function displayTotalPriceAndQuantity(){
   let divTotalQty = document.getElementById("totalQuantity");
   let divTotalPrice = document.getElementById("totalPrice");
 
-  
+  if (tabOfItem.length != 0) {
+    for (let item of tabOfItem) {
+      // recuperation de la qte sur un produit
+      let qtyValue = parseFloat(item.querySelector(".itemQuantity").value);
 
-    if (tabOfItem.length != 0) {
-      
-      
+      tabResult.totalqty += qtyValue;
 
-      for (let item of tabOfItem) {
+      // recuperation du prix pour un produit
+      let priceValue = parseFloat(
+        item.querySelector(".cart__item__content__description :nth-child(3)")
+          .textContent
+      );
 
-        // recuperation de la qte sur un produit
-        let qtyValue = parseFloat(item.querySelector(".itemQuantity").value);
-
-        tabResult.totalqty += qtyValue;
-
-        // recuperation du prix pour un produit
-        let priceValue = parseFloat(
-          item.querySelector(".cart__item__content__description :nth-child(3)")
-            .textContent
-        );
-
-        tabResult.totalprice += qtyValue * priceValue;
-
-      }
-      //affichage des totaux
-     divTotalQty.innerText = tabResult.totalqty;
-
-     divTotalPrice.innerText = tabResult.totalprice;
-
-     console.log(tabResult)
-
+      tabResult.totalprice += qtyValue * priceValue;
     }
-    else {
+    //affichage des totaux
+    divTotalQty.innerText = tabResult.totalqty;
 
-      divTotalQty.innerText = 0;
+    divTotalPrice.innerText = tabResult.totalprice;
 
-      divTotalPrice.innerText = 0;
+    console.log(tabResult);
+  } else {
+    divTotalQty.innerText = 0;
 
-
-    }
- 
+    divTotalPrice.innerText = 0;
+  }
 }
 
 //fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
 function upDateCartIfQuantityChange(newqty, productId, productColor) {
-
   // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
-  if (newqty < 1){
+  if (newqty < 1) {
+    alert("Veuillez entrer une quantite valide");
 
-    alert("Veuillez entrer une quantite strictement superieur à 0");
-
-    return newqty
-    
-    
+    return newqty;
   }
-  
+
   // recupere le panier du localstorage dans un tableau
   let cart = getCartInlocalStorage();
 
   for (let item of cart) {
-
     if (item.id == productId && item.color == productColor) {
-
       item.qty = newqty;
 
       // mise à jours du panier dans le local storage
-      
+
       window.localStorage.setItem("product", JSON.stringify(cart));
 
       break;
@@ -296,38 +265,35 @@ function upDateCartIfQuantityChange(newqty, productId, productColor) {
 
   // affiche les totaux prix et qte
   displayTotalPriceAndQuantity();
-
-  
 }
 
+// supprime un produit apres un click sur le bouton suprimer
 
-// supprime un produit apres un click sur le bouton suprimer  
-
-function deleteItemFromCart(productId, productColor){
-
+function deleteItemFromCart(productId, productColor) {
   //supression dans le local storage
   let cart = getCartInlocalStorage();
 
-  for (let item of cart){
-
-    if(item.id == productId && item.color == productColor){
-
-      // recupere l^index de l' item a suprimer
-      let index = cart.indexOf(item);
-
+  for (let i in cart) {
+    if (cart[i].id == productId && cart[i].color == productColor) {
       // supprime l' item dans le panier
-      cart.splice(index, 1);
+      cart.splice(i, 1);
 
-      //mise à jour du panier dans le local storage avec l' item supprimer
+      //mise à jour du panier dans le local storage avec l' item supprimé
       window.localStorage.setItem("product", JSON.stringify(cart));
 
-      break
+      break;
     }
   }
 
-  
   // supression de l' item dans le DOM
-  let itemFromDom = document.querySelector("article[data-id='" + productId + "']" + "[data-color='" + productColor + "']");
+  let itemFromDom = document.querySelector(
+    "article[data-id='" +
+      productId +
+      "']" +
+      "[data-color='" +
+      productColor +
+      "']"
+  );
   itemFromDom.remove();
 
   //mise a jour et affichage des totaux  prix et qte
@@ -337,18 +303,16 @@ function deleteItemFromCart(productId, productColor){
 // Fonction principale qui affiche les produits sur la page panier
 
 function displayProductsInCart() {
-  
-
   // récuperation du panier dans le local storage
   let cart = getCartInlocalStorage();
   console.log(cart);
-  
-  // trie du tableau par id 
-  if (cart != null){
-  cart.sort(function(a,b){
-    return (a.id).localeCompare((b.id)) 
-  })
-  console.log(cart);
+
+  // trie du tableau par id
+  if (cart != null) {
+    cart.sort(function (a, b) {
+      return a.id.localeCompare(b.id);
+    });
+    console.log(cart);
   }
 
   // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
@@ -379,7 +343,6 @@ function displayProductsInCart() {
           let productImgUrl = data.imageUrl;
           let productName = data.name;
 
-          
           // Affiche un seul produit du panier
           displayOneItemInCart(
             productId,
@@ -392,7 +355,7 @@ function displayProductsInCart() {
         })
 
         // Misa à jour et affichage des totaux prix et qte
-        .then (function (){
+        .then(function () {
           displayTotalPriceAndQuantity();
         })
 
@@ -400,82 +363,76 @@ function displayProductsInCart() {
           alert("il s'est produit une erreur: " + err);
         });
     }
-
   } else {
     alert("Votre panier est vide !");
   }
 }
 
-
-
-
-
-
-
 /******************** script partie N°2: validation et contrôle des donnees issu du formulaire******************/
 
 // variable liees au DOM
 
-
-
 const form = document.querySelector(".cart__order__form");
-
 
 const inputFirstName = document.getElementById("firstName");
 
-
 const inputLastName = document.getElementById("lastName");
-
 
 const inputAddress = document.getElementById("address");
 
-
 const inputCity = document.getElementById("city");
-
 
 const inputEmail = document.getElementById("email");
 
-
 const buttonOrder = document.getElementById("order");
 
-
-
-
-
 // initialisation des expressions regulieres
-  const regExAlphabetical = /[^A-Za-z\-_\'.]/g;
-  const regExAlphanumeric = /[^A-Za-z0-9\-_\'.]/g;
-  const regExEmail = /[^a-z0-9]+[^a-z0-9\-_\'\.]+[^@]{1}[^a-z0-9\.]{3,}[^.]{1}[^a-z\-_\']/g;
 
+//contrainte pour Nom, Prenom, Ville => Accepte des valeurs "alphabetique" ainsi que des "'", des "-", des "_" .
+
+const regExAlphabetical = /^[A-Za-z_\'\-]+(?:[A-Za-z_\'\-]+\s[A-Za-z_\'\-]*)*$/g;
+
+//contrainte pour Adresse => Accepte uniquement une valeur alphanumerique ainsi que des "'", des "-", des "_" et des 5 espaces.
+
+const regExAlphanumeric =  /^[A-Za-z0-9_\'\-]+(?:[A-Za-z0-9_\'\-]+\s[A-Za-z0-9_\'\-]*)*$/g;
+
+// contrainte pour Email => Le nom d' utilisateur commence uniquement par une lettre minuscule ou un nombre  , un seul "@", un nom de domaine en minuscule avec un seul point avant l'indicatif
+
+const regExEmail = /^[a-z0-9]+[a-z0-9\-_\'\.]+@[a-z0-9\.]{3,}\.[a-z]{2,}$/g;
 
 // initialisation des differents messages d' erreur
-  const errorMsgMiss = "Nombre de caracteres insuffisants ,veuillez remplir le champ";
-  const errorMsgWrongAlphabetical = "Ce champ doit comporter uniquement des lettres";
-  const errorMsgWrongAlphanumerical =  "Ce champ doit comporter uniquement des caracteres alphanumeriques";
-  const errorMsgWrongEmail =  "Ce champ doit comporter une adresse email valide";
+const errorMsgMiss =   "Nombre de caracteres insuffisants ,veuillez compléter le champs";
+
+const errorMsgWrongAlphabetical =   "Ce champs peut contenir uniquement des 'lettres', des '_', des '-'";
+
+const errorMsgWrongAlphanumerical =  "Ce champs peut contenir uniquement des caractères alphanumeriques";
+
+const errorMsgWrongEmail = "Ce champs doit comporter une adresse email valide";
+
+const errorMsgOver = "Ce champ doit comporter 50 carractères maximum";
+
+const errorMsgEmpty = "Elément vide, veuillez remplir le champs";
 
 // Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
 let tabCheckInput = {
-  "firstName" : null,
-  "lastName" : null,
-  "address" : null,
-  "city" : null,
-  "email" : null
-}
-
-
+  "firstName": null,
+  "lastName": null,
+  "address": null,
+  "city": null,
+  "email": null,
+};
 
 /**** declaration des fonctions *****/
 
 // Affiche une alerte et redirige vers la page accueil si le panier est vide
-function checkIfCartIsnNotEmpty(){
-  
-  let cart = getCartInlocalStorage();
-  console.log(cart)
+function isCartIsNotEmpty() {
 
-  if (cart.length > 0){
-    return true
+  let cart = getCartInlocalStorage();
+  console.log(cart);
+
+  if (cart.length > 0) {
+    return true;
   }
 
   alert(
@@ -485,155 +442,183 @@ function checkIfCartIsnNotEmpty(){
   window.location.href = "./index.html";
 
   return false;
-  
 }
 
+// determine l' expressions réguliere de contrainte à utiliser en fonction de l' input selectionnèé par l' utilisateur
 
-// determine les expressions régulieres de comparaison en fonction de l' input utilisée
-
-function setRegEx(inputId){
-
+function setRegEx(inputId) {
   let regEx = null;
 
-  switch(inputId){
-
-    case "firstName" : 
-    case "lastName" :
-    case "city" :
+  switch (inputId) {
+    case "firstName":
+    case "lastName":
+    case "city":
       regEx = regExAlphabetical;
-      break
+      break;
 
     case "address":
       regEx = regExAlphanumeric;
-      break
+      break;
 
-    case "email" :
+    case "email":
       regEx = regExEmail;
-      break
-
-
+      break;
   }
-  return regEx
+  return regEx;
 }
 
-// determine les messages d' erreur à afficher en fonction de l' input utilisée
+// determine le type de  message d' erreur à afficher en fonction de l' input utilisateur selectionnée
 
-function setErrorMessage(inputId){
-
+function setErrorMessage(inputId) {
   let errorMessage = null;
 
-  switch(inputId){
+  switch (inputId) {
     case "firstName":
     case "lastName":
-    case "cityName":
+    case "city":
       errorMessage = errorMsgWrongAlphabetical;
-      break
+      break;
 
-    case "address" :
+    case "address":
       errorMessage = errorMsgWrongAlphanumerical;
-      break
-    
-    case "email" :
+      break;
+
+    case "email":
       errorMessage = errorMsgWrongEmail;
-      break
-    
+      break;
   }
 
-  return errorMessage
+  return errorMessage;
 }
 
 // determine l' element html oû sera afficher le message d' erreur
 
-function targetContainerForErrorMessage(inputId){
-
+function targetContainerForErrorMessage(inputId) {
   let containerErrorMessage;
 
-  switch(inputId){
-    
+  switch (inputId) {
     case "firstName":
-       containerErrorMessage =  document.getElementById("firstNameErrorMsg");
-      break
+      containerErrorMessage = document.getElementById("firstNameErrorMsg");
+      break;
 
     case "lastName":
-       containerErrorMessage = document.getElementById("lastNameErrorMsg");
-      break
+      containerErrorMessage = document.getElementById("lastNameErrorMsg");
+      break;
 
     case "address":
-       containerErrorMessage = document.getElementById("addressErrorMsg");
-      break
+      containerErrorMessage = document.getElementById("addressErrorMsg");
+      break;
 
     case "city":
-       containerErrorMessage = document.getElementById("cityErrorMsg");
-      break
+      containerErrorMessage = document.getElementById("cityErrorMsg");
+      break;
 
     case "email":
-       containerErrorMessage = document.getElementById("emailErrorMsg");
-      break
-
+      containerErrorMessage = document.getElementById("emailErrorMsg");
+      break;
   }
 
   return containerErrorMessage;
 }
 
-// teste la validite d' une input utilisateur 
+// teste la validite d' une input utilisateur
 
-function checkInputFromForm(inputValue, inputId){
+function validateInputFromForm(inputValue, inputId) {
 
   let regEx = setRegEx(inputId);
   let errorMessage = setErrorMessage(inputId);
   let containerErrorMessage = targetContainerForErrorMessage(inputId);
   let inputForm = document.getElementById(inputId);
-
-  if (inputValue.match(regEx)) {
-    containerErrorMessage.innerText = errorMessage;
-    inputForm.style.border = "2px solid red";
-    
-     tabCheckInput[inputId] = false;
-     return tabCheckInput[inputId]
-    
-
-  } 
-  else if (inputValue.length < 2) {
-    containerErrorMessage.innerText = errorMsgMiss;
-    inputForm.style.border = "2px solid red";
-
-   tabCheckInput[inputId] = false;
-   return tabCheckInput[inputId];
+  let characterNumberMinimum = null;
 
 
+  switch(regEx){
+
+    case regExAlphabetical :
+      characterNumberMinimum  = 2;
+      break
+
+    case regExAlphanumeric :
+    case regExEmail :
+
+      characterNumberMinimum  = 10;
+      break
+
+      
   }
-  else {
+
+  // si l' input utilisateur correspond à la contrainte regEx, et que le nombre de caracteres est compris entre nombre minimum et 50 , on valide l'input.
+  if (
+    inputValue.match(regEx) &&
+    inputValue.length >= characterNumberMinimum &&
+    inputValue.length <= 50
+  ) {
     containerErrorMessage.innerText = null;
     inputForm.style.border = "2px solid green";
     
+
     tabCheckInput[inputId] = true;
-    return tabCheckInput[inputId];
-    
-     
+    return;
   }
 
+  //si l'input utilisateur correspond à la contrainte regEx et que le nbr de carractere est superieur à 50  on affiche le message d'erreur indiquant que le nbr de carracteres trop grand.
+  if (inputValue.match(regEx) && inputValue.length > 50) {
+    containerErrorMessage.innerText = errorMsgOver;
+    inputForm.style.border = "2px solid red";
+
+    tabCheckInput[inputId] = false;
+    return;
+  }
+
+  // si l'input utilisateur correspond à la contrainte regEx et que le nbr de carracteres est inférieur à 2, on affiche le message d'erreur indiquant que le nbr de carracteres est insuffisant.
+  if (inputValue.match(regEx) && inputValue.length < characterNumberMinimum) {
+    containerErrorMessage.innerText = errorMsgMiss;
+    inputForm.style.border = "2px solid red";
+
+    tabCheckInput[inputId] = false;
+    return;
+  }
+
+  // si l' input utilisateur ne correspond pas à la contrainte regEx, et que le nbr de carracteres est non nul on affiche le message d' erreur indiquant que ces carracteres ne sont pas autorisés.
+  if (!inputValue.match(regEx) && inputValue.length != 0) {
+    containerErrorMessage.innerText = errorMessage;
+    inputForm.style.border = "2px solid red";
+
+    tabCheckInput[inputId] = false;
+    return;
+  }
+
+  // si l' input utilisateur est vide , on affiche un message indiquant que le champs doit etre completé
+  if (inputValue.length == 0) {
+    containerErrorMessage.innerText = errorMsgEmpty;
+    inputForm.style.border = "2px solid red";
+
+    tabCheckInput[inputId] = false;
+    return;
+  }
 }
-
-
 
 //  controle du formulaire apres un click sur le bouton commander
 
-function checkValidityOfForm(evt) {
-  
+function validateForm(evt) {
   // bloque l' envoi du formulaire pour l' execution des fonctions de controle
   evt.preventDefault();
-  
-  //verifie si le panier n'est pas vide (apres suppression de tous les produits le panier peut etre vide)
-  let valid = checkIfCartIsnNotEmpty();
-  console.log(valid)
 
-  // si valid est different de true le panier est vide, on sort de la fonction
-  if(!valid){ 
-    return
-  }  
+  //verifie si le panier n'est pas vide 
+  let valid = isCartIsNotEmpty();
+  console.log(valid);
 
-    // controle de la validite des inputs du formulaire
-    if(tabCheckInput.firstName && tabCheckInput.lastName && tabCheckInput.address && tabCheckInput.city && tabCheckInput.email){
+  // si valid est different de true, le panier est vide, on sort de la fonction
+  if (!valid) {
+    return;
+  }
+
+  // Si les inputs du formulaire sont valide on procède à la requete fetch vers l'API
+  if (tabCheckInput.firstName &&
+    tabCheckInput.lastName &&
+    tabCheckInput.address &&
+    tabCheckInput.city &&
+    tabCheckInput.email) {
 
       // objet contact à envoyer vers l' API
       let contact = {
@@ -641,29 +626,27 @@ function checkValidityOfForm(evt) {
         lastName: inputLastName.value,
         address: inputAddress.value,
         city: inputCity.value,
-        email: inputEmail.value
+        email: inputEmail.value,
       };
-      
-      // tableau de produit-id à envoyer vers 
+
+      // tableau de produit-id à envoyer vers l' API
 
       let cart = getCartInlocalStorage();
       let products = [];
 
-      for (let item of  cart){
-        
-        products.push(item.id)
+      for (let item of cart) {
+        products.push(item.id);
       }
 
-      console.log(products)
-        
+      console.log(products);
 
-        let bodyRequest = {
-          "contact" : contact,
-          "products" : products
-        };
+      let bodyRequest = {
+        contact: contact,
+        products: products,
+      };
 
-        // formatage json pour le fetch post
-        let jsonBodyRequest = JSON.stringify(bodyRequest);
+      // formatage json pour le fetch post
+      let jsonBodyRequest = JSON.stringify(bodyRequest);
 
       //requette post vers l 'API
 
@@ -672,75 +655,79 @@ function checkValidityOfForm(evt) {
       const setFetch = {
         method: "POST",
         body: jsonBodyRequest,
-        headers : {
-          "content-Type" : "application/json",
+        headers: {
+          "content-Type": "application/json",
         }
       };
 
-      fetch(apiUrl,setFetch)
-      
-      .then(function (res) {
-        return res.json();
-      })
+      fetch(apiUrl, setFetch)
+        .then(function (res) {
+          return res.json();
+        })
 
-      .then(function(data){
+        .then(function (data) {
+          let idOrder = data.orderId;
+          window.location.href = "./confirmation.html?orderId=" + idOrder;
+        })
 
-        let idOrder = data.orderId;
-        window.location.href = "./confirmation.html?orderId=" + idOrder;
-      })
-
-      .catch(function (err) {
-            alert("il s'est produit une erreur: " + err);
-          });
+        .catch(function (err) {
+          alert("il s'est produit une erreur: " + err);
+        });
+        return
     }
-    
-    // Indique à l'utilisateur quel champ du formulaire  est mal rempli 
-    
-    // declenche les event des inputs
-    const event = new Event ("input")
-    inputFirstName.dispatchEvent(event);
-    inputLastName.dispatchEvent(event);
-    inputAddress.dispatchEvent(event);
-    inputCity.dispatchEvent(event);
-    inputEmail.dispatchEvent(event);
-      alert(
-        "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
-      );
-    return
-  
-  
-}
-  
 
+  // Autrement on relance un controle des inputs pour déterminer quelles sont celles qui sont en défaut
+  else{
+  // declenche les event des inputs
+  const event = new Event("input");
+  inputFirstName.dispatchEvent(event);
+  inputLastName.dispatchEvent(event);
+  inputAddress.dispatchEvent(event);
+  inputCity.dispatchEvent(event);
+  inputEmail.dispatchEvent(event);
   
+  // Met le focus sur la premiere input mal renseignée
+  for (let i in tabCheckInput){
+
+    if(!tabCheckInput[i]){
+     document.getElementById(i).focus();
+      break
+    }
+  }
+  alert(
+    "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
+  );
+  return;
+  }
+}
+
 // ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire
-function listenerEvent(){
+function listenerEvents() {
+  inputFirstName.addEventListener("input", function () {
+    validateInputFromForm(this.value, this.id);
+  });
+  inputLastName.addEventListener("input", function () {
+    validateInputFromForm(this.value, this.id);
+  });
+  inputAddress.addEventListener("input", function () {
+    validateInputFromForm(this.value, this.id);
+  });
+  inputCity.addEventListener("input", function () {
+    validateInputFromForm(this.value, this.id);
+  });
+  inputEmail.addEventListener("input", function () {
+    validateInputFromForm(this.value, this.id);
+  });
 
-
-inputFirstName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
-inputLastName.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
-inputAddress.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
-inputCity.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
-inputEmail.addEventListener("input", function(){ checkInputFromForm(this.value, this.id)});
-
-
-
-buttonOrder.addEventListener("click",  checkValidityOfForm );
-
+  buttonOrder.addEventListener("click", validateForm);
 }
-
-
-
 
 // function globale pour l' execution du script principal
 
-function runKanapCart(){
-
+function runKanapCart() {
   displayProductsInCart();
-  listenerEvent();
-
+  listenerEvents();
 }
-
 
 /**************************************** script principal**************************************** */
 
