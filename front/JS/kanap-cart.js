@@ -21,13 +21,20 @@ const sectionItems = document.getElementById("cart__items");
 /**** declaration des fonctions *****
  * **********************************/
 
-// Recupere les produits du panier dans le local storage
+//recuperation du panier dans le local storage
+function getCartFromLocalStorage() {
+  // si un produit existe dans le local storage on initialise le panier actuel avec la valeur du local storage
 
-function getCartInlocalStorage() {
-  let cart = JSON.parse(window.localStorage.getItem("product"));
-  console.log(localStorage);
-  console.log(cart);
-  return cart;
+  if (window.localStorage.getItem("product") != null) {
+    let actualCart = JSON.parse(window.localStorage.getItem("product"));
+    return actualCart;
+  }
+
+  //si le local storage est vide on initialise le panier avec un tableau vide
+  else {
+    let actualCart = [];
+    return actualCart;
+  }
 }
 
 // Creation de l' élement Article.
@@ -249,7 +256,7 @@ function upDateCartIfQuantityChange(newqty, productId, productColor) {
   }
 
   // recupere le panier du localstorage dans un tableau
-  let cart = getCartInlocalStorage();
+  let cart = getCartFromLocalStorage();
 
   for (let item of cart) {
     if (item.id == productId && item.color == productColor) {
@@ -271,7 +278,7 @@ function upDateCartIfQuantityChange(newqty, productId, productColor) {
 
 function deleteItemFromCart(productId, productColor) {
   //supression dans le local storage
-  let cart = getCartInlocalStorage();
+  let cart = getCartFromLocalStorage();
 
   for (let i in cart) {
     if (cart[i].id == productId && cart[i].color == productColor) {
@@ -296,7 +303,7 @@ function deleteItemFromCart(productId, productColor) {
   );
   itemFromDom.remove();
 
-  //mise a jour et affichage des totaux  prix et qte
+  //mise à jour et affichage des totaux  prix et qte
   displayTotalPriceAndQuantity();
 }
 
@@ -304,7 +311,7 @@ function deleteItemFromCart(productId, productColor) {
 
 function displayProductsInCart() {
   // récuperation du panier dans le local storage
-  let cart = getCartInlocalStorage();
+  let cart = getCartFromLocalStorage();
   console.log(cart);
 
   // trie du tableau par id
@@ -363,8 +370,6 @@ function displayProductsInCart() {
           alert("il s'est produit une erreur: " + err);
         });
     }
-  } else {
-    alert("Votre panier est vide !");
   }
 }
 
@@ -390,22 +395,27 @@ const buttonOrder = document.getElementById("order");
 
 //contrainte pour Nom, Prenom, Ville => Accepte des valeurs "alphabetique" ainsi que des "'", des "-", des "_" .
 
-const regExAlphabetical = /^[A-Za-z_\'\-]+(?:[A-Za-z_\'\-]+\s[A-Za-z_\'\-]*)*$/g;
+const regExAlphabetical =
+  /^[A-Za-z_\'\-]+(?:[A-Za-z_\'\-]+\s[A-Za-z_\'\-]*)*$/g;
 
 //contrainte pour Adresse => Accepte uniquement une valeur alphanumerique ainsi que des "'", des "-", des "_" et des 5 espaces.
 
-const regExAlphanumeric =  /^[A-Za-z0-9_\'\-]+(?:[A-Za-z0-9_\'\-]+\s[A-Za-z0-9_\'\-]*)*$/g;
+const regExAlphanumeric =
+  /^[A-Za-z0-9_\'\-]+(?:[A-Za-z0-9_\'\-]+\s[A-Za-z0-9_\'\-]*)*$/g;
 
 // contrainte pour Email => Le nom d' utilisateur commence uniquement par une lettre minuscule ou un nombre  , un seul "@", un nom de domaine en minuscule avec un seul point avant l'indicatif
 
 const regExEmail = /^[a-z0-9]+[a-z0-9\-_\'\.]+@[a-z0-9\.]{3,}\.[a-z]{2,}$/g;
 
 // initialisation des differents messages d' erreur
-const errorMsgMiss =   "Nombre de caracteres insuffisants ,veuillez compléter le champs";
+const errorMsgMiss =
+  "Nombre de caracteres insuffisants ,veuillez compléter le champs";
 
-const errorMsgWrongAlphabetical =   "Ce champs peut contenir uniquement des 'lettres', des '_', des '-'";
+const errorMsgWrongAlphabetical =
+  "Ce champs peut contenir uniquement des 'lettres', des '_', des '-'";
 
-const errorMsgWrongAlphanumerical =  "Ce champs peut contenir uniquement des caractères alphanumeriques";
+const errorMsgWrongAlphanumerical =
+  "Ce champs peut contenir uniquement des caractères alphanumeriques";
 
 const errorMsgWrongEmail = "Ce champs doit comporter une adresse email valide";
 
@@ -416,19 +426,18 @@ const errorMsgEmpty = "Elément vide, veuillez remplir le champs";
 // Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
 let tabCheckInput = {
-  "firstName": null,
-  "lastName": null,
-  "address": null,
-  "city": null,
-  "email": null,
+  firstName: null,
+  lastName: null,
+  address: null,
+  city: null,
+  email: null,
 };
 
 /**** declaration des fonctions *****/
 
 // Affiche une alerte et redirige vers la page accueil si le panier est vide
 function isCartIsNotEmpty() {
-
-  let cart = getCartInlocalStorage();
+  let cart = getCartFromLocalStorage();
   console.log(cart);
 
   if (cart.length > 0) {
@@ -524,27 +533,21 @@ function targetContainerForErrorMessage(inputId) {
 // teste la validite d' une input utilisateur
 
 function validateInputFromForm(inputValue, inputId) {
-
   let regEx = setRegEx(inputId);
   let errorMessage = setErrorMessage(inputId);
   let containerErrorMessage = targetContainerForErrorMessage(inputId);
   let inputForm = document.getElementById(inputId);
   let characterNumberMinimum = null;
 
+  switch (regEx) {
+    case regExAlphabetical:
+      characterNumberMinimum = 2;
+      break;
 
-  switch(regEx){
-
-    case regExAlphabetical :
-      characterNumberMinimum  = 2;
-      break
-
-    case regExAlphanumeric :
-    case regExEmail :
-
-      characterNumberMinimum  = 10;
-      break
-
-      
+    case regExAlphanumeric:
+    case regExEmail:
+      characterNumberMinimum = 10;
+      break;
   }
 
   // si l' input utilisateur correspond à la contrainte regEx, et que le nombre de caracteres est compris entre nombre minimum et 50 , on valide l'input.
@@ -555,7 +558,6 @@ function validateInputFromForm(inputValue, inputId) {
   ) {
     containerErrorMessage.innerText = null;
     inputForm.style.border = "2px solid green";
-    
 
     tabCheckInput[inputId] = true;
     return;
@@ -604,7 +606,7 @@ function validateForm(evt) {
   // bloque l' envoi du formulaire pour l' execution des fonctions de controle
   evt.preventDefault();
 
-  //verifie si le panier n'est pas vide 
+  //verifie si le panier n'est pas vide
   let valid = isCartIsNotEmpty();
   console.log(valid);
 
@@ -614,70 +616,71 @@ function validateForm(evt) {
   }
 
   // Si les inputs du formulaire sont valide on procède à la requete fetch vers l'API
-  if (tabCheckInput.firstName &&
+  if (
+    tabCheckInput.firstName &&
     tabCheckInput.lastName &&
     tabCheckInput.address &&
     tabCheckInput.city &&
-    tabCheckInput.email) {
+    tabCheckInput.email
+  ) {
+    // objet contact à envoyer vers l' API
+    let contact = {
+      firstName: inputFirstName.value,
+      lastName: inputLastName.value,
+      address: inputAddress.value,
+      city: inputCity.value,
+      email: inputEmail.value,
+    };
 
-      // objet contact à envoyer vers l' API
-      let contact = {
-        firstName: inputFirstName.value,
-        lastName: inputLastName.value,
-        address: inputAddress.value,
-        city: inputCity.value,
-        email: inputEmail.value,
-      };
+    // tableau de produit-id à envoyer vers l' API
 
-      // tableau de produit-id à envoyer vers l' API
+    let cart = getCartFromLocalStorage();
+    let products = [];
 
-      let cart = getCartInlocalStorage();
-      let products = [];
-
-      for (let item of cart) {
-        products.push(item.id);
-      }
-
-      console.log(products);
-
-      let bodyRequest = {
-        contact: contact,
-        products: products,
-      };
-
-      // formatage json pour le fetch post
-      let jsonBodyRequest = JSON.stringify(bodyRequest);
-
-      //requette post vers l 'API
-
-      const apiUrl = "http://localhost:3000/api/products/order";
-
-      const setFetch = {
-        method: "POST",
-        body: jsonBodyRequest,
-        headers: {
-          "content-Type": "application/json",
-        }
-      };
-
-      fetch(apiUrl, setFetch)
-        .then(function (res) {
-          return res.json();
-        })
-
-        .then(function (data) {
-          let idOrder = data.orderId;
-          window.location.href = "./confirmation.html?orderId=" + idOrder;
-        })
-
-        .catch(function (err) {
-          alert("il s'est produit une erreur: " + err);
-        });
-        return
+    for (let item of cart) {
+      products.push(item.id);
     }
 
+    console.log(products);
+
+    let bodyRequest = {
+      contact: contact,
+      products: products,
+    };
+
+    // formatage json pour le fetch post
+    let jsonBodyRequest = JSON.stringify(bodyRequest);
+
+    //requette post vers l 'API
+
+    const apiUrl = "http://localhost:3000/api/products/order";
+
+    const setFetch = {
+      method: "POST",
+      body: jsonBodyRequest,
+      headers: {
+        "content-Type": "application/json",
+      },
+    };
+
+    fetch(apiUrl, setFetch)
+      .then(function (res) {
+        return res.json();
+      })
+
+      .then(function (data) {
+        let idOrder = data.orderId;
+        window.location.href = "./confirmation.html?orderId=" + idOrder;
+      })
+
+      .catch(function (err) {
+        alert("il s'est produit une erreur: " + err);
+      });
+    return;
+  }
+
   // Autrement on relance un controle des inputs pour déterminer quelles sont celles qui sont en défaut
-  else{
+
   // declenche les event des inputs
   const event = new Event("input");
   inputFirstName.dispatchEvent(event);
@@ -685,20 +688,18 @@ function validateForm(evt) {
   inputAddress.dispatchEvent(event);
   inputCity.dispatchEvent(event);
   inputEmail.dispatchEvent(event);
-  
-  // Met le focus sur la premiere input mal renseignée
-  for (let i in tabCheckInput){
 
-    if(!tabCheckInput[i]){
-     document.getElementById(i).focus();
-      break
+  // Met le focus sur la premiere input mal renseignée
+  for (let i in tabCheckInput) {
+    if (!tabCheckInput[i]) {
+      document.getElementById(i).focus();
+      break;
     }
   }
   alert(
     "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
   );
   return;
-  }
 }
 
 // ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire
@@ -731,4 +732,5 @@ function runKanapCart() {
 
 /**************************************** script principal**************************************** */
 
+//Execution du script principal
 runKanapCart();

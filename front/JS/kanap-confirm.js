@@ -19,13 +19,13 @@ function getOrderNumberFromUrl() {
 }
 
 // Affiche le numero de commande dans la page
-function displayOrderNumber(orderId) {
+function displayOrderNumber(orderNumber) {
   let divOrder = document.getElementById("orderId");
-  divOrder.innerText = orderId;
+  divOrder.innerText = orderNumber;
 }
 
 //vide le panier contenu dans le local storage
-function deleteCart() {
+function deleteCartInLocalStorage() {
   window.localStorage.clear();
 }
 
@@ -35,9 +35,11 @@ function runKanapConfirm() {
 
   let orderNumber = getOrderNumberFromUrl();
   displayOrderNumber(orderNumber);
-  deleteCart();
+  deleteCartInLocalStorage();
 }
 
 
 /************************ script principal ************************************************** */
+
+// Execution du script principal
 runKanapConfirm();
