@@ -15,6 +15,9 @@
 
 /*** constantes liées au DOM ************/
 const buttonCart = document.getElementById("addToCart");
+const inputSetQty = document.getElementById("quantity");
+const inputSetColor = document.getElementById("colors");
+
 
 /***** declaration des fonctions ****** */
 
@@ -132,12 +135,14 @@ function validateQuantity(qty) {
   if (qty < 1) {
     alert("Veuillez entrer une quantite strictement superieur à 0");
     inputQty.style.border = "2px solid red";
+    inputQty.focus();
 
-    return false;
+    return null;
   }
 
   inputQty.style.border = "2px solid transparent";
-  return true;
+  inputQty.blur();
+  return qty;
 }
 
 // recupere la couleur defini par l' utilisateur
@@ -156,13 +161,15 @@ function validateColor(color) {
   for (option of arrayOfOptionColor) {
     if (color == option.innerText) {
       selectColor.style.border = "2px solid transparent";
-      return true;
+      selectColor.blur();
+      return color;
     }
   }
   alert("veuillez selectionner une couleur dans la liste proposée");
   selectColor.style.border = "2px solid red";
+  selectColor.focus();
 
-  return false;
+  return null;
 }
 
 //enregistre les données du panier dans le local storage
@@ -202,22 +209,24 @@ function pushToCart() {
   // recupère la qte  choisi par l' utilisateur
   let qty = getQuantity();
 
+  
   // controle si la quantite entree par l' utilisateur est valide
-  let quantityValid = validateQuantity(qty);
-  if (!quantityValid) {
+  let validQty = validateQuantity(qty);
+  
+  if (validQty === null) {
     return;
   }
 
   // recupere la couleur choisi par l' utilisateur
   let color = getColor();
-  console.log(color);
 
   // controle si une couleur valide a été selectionné par l' utilisateur
-  let colorValid = validateColor(color);
-  if (!colorValid) {
+  let validColor = validateColor(color);
+  
+  if (validColor === null) {
     return;
   }
-  console.log(colorValid);
+  
 
   // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
@@ -256,6 +265,13 @@ function pushToCart() {
   locationToCartPage();
 }
 
+function listener(){
+
+  
+  buttonCart.addEventListener("click", pushToCart);
+}
+
+
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
@@ -263,9 +279,8 @@ function runKanapProduct() {
 
   displayDataProductById();
 
-  // Enregistre le produit dans le panier lorsque l' utilisteur click sur "ajouter au panier"
+  listener();
 
-  buttonCart.addEventListener("click", pushToCart);
 }
 
 /********************************************** script principal  *********************************************/
