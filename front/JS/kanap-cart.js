@@ -51,6 +51,7 @@ function createElementArticle(id, color) {
 //ceation de l' élément div conteneur et de l' image du produit
 
 function createElementDivContainerAndImg(elementArticle, urlImg) {
+
   let divContainerImg = document.createElement("div");
   divContainerImg.setAttribute("class", "cart__item__img");
   elementArticle.appendChild(divContainerImg);
@@ -134,13 +135,10 @@ function createElementDivContainerSetQty(
   divContainerSetQty.appendChild(inputSetQty);
 
   inputSetQty.addEventListener("change", function (evt) {
-    let qty = upDateCartIfQuantityChange(this.value, productId, productColor);
+    
+    upDateCartIfQuantityChange(this.value, productId, productColor, evt);
 
-    if (qty < 1) {
-      evt.target.style.border = "2px solid red";
-    } else {
-      evt.target.style.border = "2px solid transparent";
-    }
+   
   });
 }
 
@@ -247,12 +245,13 @@ function displayTotalPriceAndQuantity() {
 
 //fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
-function upDateCartIfQuantityChange(newqty, productId, productColor) {
+function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
   // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
   if (newqty < 1) {
-    alert("Veuillez entrer une quantite valide");
-
-    return newqty;
+    alert("Veuillez entrer une quantite superieur à 0");
+    evt.target.style.border = "2px solid red";
+    evt.target.focus();
+    return 
   }
 
   // recupere le panier du localstorage dans un tableau
@@ -307,20 +306,28 @@ function deleteItemFromCart(productId, productColor) {
   displayTotalPriceAndQuantity();
 }
 
+// trie du tableau par id
+function sortCart(cart){
+  
+    cart.sort(function (a, b) {
+      return a.id.localeCompare(b.id);
+    });
+    
+  
+}
+
 // Fonction principale qui affiche les produits sur la page panier
 
 function displayProductsInCart() {
   // récuperation du panier dans le local storage
   let cart = getCartFromLocalStorage();
   console.log(cart);
-
-  // trie du tableau par id
+  
   if (cart != null) {
-    cart.sort(function (a, b) {
-      return a.id.localeCompare(b.id);
-    });
+    sortCart(cart);
     console.log(cart);
   }
+  
 
   // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
 
@@ -344,7 +351,7 @@ function displayProductsInCart() {
           return res.json();
         })
 
-        // recueration du prix et de l' url de l' image du produit recu de l' API
+        // recuperation du prix et de l' url de l' image du produit recu de l' API
         .then(function (data) {
           let productPrice = data.price;
           let productImgUrl = data.imageUrl;
