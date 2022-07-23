@@ -57,7 +57,7 @@ function displayDataText(name, price, desc) {
   productDescription.innerText = desc;
 }
 
-// Crée les elements "option" dans le DOM , permetant le choix de la couleur par l' utilisateur
+// Crée les elements "option" dans le DOM, permetant le choix de la couleur par l' utilisateur
 
 function createOption(arrayOfColors) {
   const select = document.getElementById("colors");
@@ -209,10 +209,9 @@ function pushToCart() {
   // recupère la qte  choisi par l' utilisateur
   let qty = getQuantity();
 
-  
   // controle si la quantite entree par l' utilisateur est valide
   let validQty = validateQuantity(qty);
-  
+
   if (validQty === null) {
     return;
   }
@@ -222,27 +221,24 @@ function pushToCart() {
 
   // controle si une couleur valide a été selectionné par l' utilisateur
   let validColor = validateColor(color);
-  
+
   if (validColor === null) {
     return;
   }
-  
 
   // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
 
   // objet textuel representant le nouveau produit à enregister dans le panier
   let newProductToPushInCart = {
-    "id": productId,
-    "qty": qty,
-    "color": color,
+    id: productId,
+    qty: qty,
+    color: color,
   };
 
   console.log(newProductToPushInCart);
 
-  
-
-  // retourne l' index du produit deja existant dans le panier actuel
+  // Verifie si le nouveau produit existe deja dans le panier actuel
   let productIndexIfExist = isNewProductAlreadyExist(
     newProductToPushInCart,
     actualCart
@@ -267,7 +263,8 @@ function pushToCart() {
 
 function listener(){
 
-  
+  inputSetColor.addEventListener("change", function(){validateColor(this.value)});
+  inputSetQty.addEventListener("change", function(){validateQuantity(this.value)});
   buttonCart.addEventListener("click", pushToCart);
 }
 

@@ -20,7 +20,7 @@ const sectionItems = document.getElementById("items");
 
 
 
-// crée un élément html "a", avec attribut href contenant id du produit"
+// crée un élément html "a", avec attribut href contenant id du produit
 function createLink(idProduct) {
   newLink = document.createElement("a");
   newLink.setAttribute("href", "./product.html?id=" + idProduct);
@@ -69,7 +69,7 @@ function displayOneproduct(idProduct, productName, imgUrl, altText, productDescr
   createP(productDescription, newArticle);
 }
 
-// Fonction principale permetant la communication avec l' API et l' affichage des produits
+// Permet  l' affichage de l'ensemble des  produits
 
 function displayProducts() {
 

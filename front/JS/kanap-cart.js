@@ -246,15 +246,22 @@ function displayTotalPriceAndQuantity() {
 //fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
 function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
-  // Si la quantite entree par l' utilisateur est negative on stop la fonction et affiche message erreur
+  // Si la quantite entree par l' utilisateur est inferieur à 1 on stop la fonction et affiche message erreur
   if (newqty < 1) {
-    alert("Veuillez entrer une quantite superieur à 0");
     evt.target.style.border = "2px solid red";
-    evt.target.focus();
+
+    setTimeout(function(){
+      alert("Quantité minimum à 1");
+      evt.target.value = 1;
+      evt.target.style.border = "2px solid transparent";},
+     250);
+    
     return 
   }
+  
+  
 
-  // recupere le panier du localstorage dans un tableau
+  // recupere le panier du localstorage 
   let cart = getCartFromLocalStorage();
 
   for (let item of cart) {
@@ -292,14 +299,7 @@ function deleteItemFromCart(productId, productColor) {
   }
 
   // supression de l' item dans le DOM
-  let itemFromDom = document.querySelector(
-    "article[data-id='" +
-      productId +
-      "']" +
-      "[data-color='" +
-      productColor +
-      "']"
-  );
+  let itemFromDom = document.querySelector("article[data-id='" + productId + "']" + "[data-color='" + productColor + "']" );
   itemFromDom.remove();
 
   //mise à jour et affichage des totaux  prix et qte
@@ -368,7 +368,7 @@ function displayProductsInCart() {
           );
         })
 
-        // Misa à jour et affichage des totaux prix et qte
+        // Mise à jour et affichage des totaux prix et qte
         .then(function () {
           displayTotalPriceAndQuantity();
         })
@@ -400,35 +400,33 @@ const buttonOrder = document.getElementById("order");
 
 // initialisation des expressions regulieres
 
-//contrainte pour Nom, Prenom, Ville => Accepte des valeurs "alphabetique" ainsi que des "'", des "-", des "_" .
+//contrainte pour Nom, Prenom, Ville => Accepte des valeurs "alphabetique" ainsi que des "'", des "-", des "_" et des espaces non consecutifs .
 
-const regExAlphabetical =
-  /^[A-Za-z_\'\-]+(?:[A-Za-z_\'\-]+\s[A-Za-z_\'\-]*)*$/g;
+const regExAlphabetical = /^[A-Za-z_\']+(\s(?!\s)[A-Za-z_\'\-]*)*$/g;
 
-//contrainte pour Adresse => Accepte uniquement une valeur alphanumerique ainsi que des "'", des "-", des "_" et des 5 espaces.
+//contrainte pour Adresse => Accepte uniquement une valeur alphanumerique ainsi que des "'", des "-", des "_" et des  espaces non consécutifs.
 
-const regExAlphanumeric =
-  /^[A-Za-z0-9_\'\-]+(?:[A-Za-z0-9_\'\-]+\s[A-Za-z0-9_\'\-]*)*$/g;
+const regExAlphanumeric = /^[A-Za-z0-9_\'\-]+(\s(?!\s)[A-Za-z0-9_\'\-]*)*$/g;
 
-// contrainte pour Email => Le nom d' utilisateur commence uniquement par une lettre minuscule ou un nombre  , un seul "@", un nom de domaine en minuscule avec un seul point avant l'indicatif
+// contrainte pour Email => Le nom d' utilisateur commence uniquement par une lettre minuscule ou un nombre  , un seul "@", un nom de domaine en minuscule avec un seul point avant l'indicatif national
 
 const regExEmail = /^[a-z0-9]+[a-z0-9\-_\'\.]+@[a-z0-9\.]{3,}\.[a-z]{2,}$/g;
 
 // initialisation des differents messages d' erreur
 const errorMsgMiss =
-  "Nombre de caracteres insuffisants ,veuillez compléter le champs";
+  "Nombre de caractères insuffisants, veuillez compléter le champs";
 
 const errorMsgWrongAlphabetical =
-  "Ce champs peut contenir uniquement des 'lettres', des '_', des '-'";
+  "Ce champs peut contenir uniquement des 'lettres', des '_', des '-' et des espaces non-consecutifs";
 
 const errorMsgWrongAlphanumerical =
-  "Ce champs peut contenir uniquement des caractères alphanumeriques";
+  "Ce champs peut contenir uniquement des caractères alphanumeriques, des '_', des '-' et des espaces non-consecutifs";
 
 const errorMsgWrongEmail = "Ce champs doit comporter une adresse email valide";
 
 const errorMsgOver = "Ce champ doit comporter 50 carractères maximum";
 
-const errorMsgEmpty = "Elément vide, veuillez remplir le champs";
+const errorMsgEmpty = "Veuillez remplir le champs";
 
 // Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
@@ -597,7 +595,7 @@ function validateInputFromForm(inputValue, inputId) {
     return;
   }
 
-  // si l' input utilisateur est vide , on affiche un message indiquant que le champs doit etre completé
+  // si l' input utilisateur est vide , on affiche un message indiquant que le champs doit etre rempli
   if (inputValue.length == 0) {
     containerErrorMessage.innerText = errorMsgEmpty;
     inputForm.style.border = "2px solid red";
@@ -615,21 +613,24 @@ function validateForm(evt) {
 
   //verifie si le panier n'est pas vide
   let valid = isCartIsNotEmpty();
-  console.log(valid);
-
+  
   // si valid est different de true, le panier est vide, on sort de la fonction
   if (!valid) {
     return;
   }
 
-  // Si les inputs du formulaire sont valide on procède à la requete fetch vers l'API
+  
+
+
+  // Si les inputs du formulaire sont valides on procède à la requete fetch vers l'API
   if (
     tabCheckInput.firstName &&
     tabCheckInput.lastName &&
     tabCheckInput.address &&
     tabCheckInput.city &&
     tabCheckInput.email
-  ) {
+    ) {
+
     // objet contact à envoyer vers l' API
     let contact = {
       firstName: inputFirstName.value,
@@ -671,6 +672,7 @@ function validateForm(evt) {
     };
 
     fetch(apiUrl, setFetch)
+
       .then(function (res) {
         return res.json();
       })
@@ -683,34 +685,37 @@ function validateForm(evt) {
       .catch(function (err) {
         alert("il s'est produit une erreur: " + err);
       });
-    return;
+    
   }
 
   // Autrement on relance un controle des inputs pour déterminer quelles sont celles qui sont en défaut
+  else{
+    // declenche les event des inputs
+    const event = new Event("input");
+    inputFirstName.dispatchEvent(event);
+    inputLastName.dispatchEvent(event);
+    inputAddress.dispatchEvent(event);
+    inputCity.dispatchEvent(event);
+    inputEmail.dispatchEvent(event);
 
-  // declenche les event des inputs
-  const event = new Event("input");
-  inputFirstName.dispatchEvent(event);
-  inputLastName.dispatchEvent(event);
-  inputAddress.dispatchEvent(event);
-  inputCity.dispatchEvent(event);
-  inputEmail.dispatchEvent(event);
-
-  // Met le focus sur la premiere input mal renseignée
-  for (let i in tabCheckInput) {
-    if (!tabCheckInput[i]) {
-      document.getElementById(i).focus();
-      break;
+    // Met le focus sur la premiere input mal renseignée
+    for (let i in tabCheckInput) {
+      if (!tabCheckInput[i]) {
+        document.getElementById(i).focus();
+        break;
+      }
     }
+    alert(
+      "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
+    );
   }
-  alert(
-    "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
-  );
-  return;
+  
 }
 
-// ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire
-function listenerEvents() {
+
+// ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire et du panier
+function listenerEventsForm() {
+  
   inputFirstName.addEventListener("input", function () {
     validateInputFromForm(this.value, this.id);
   });
@@ -734,7 +739,8 @@ function listenerEvents() {
 
 function runKanapCart() {
   displayProductsInCart();
-  listenerEvents();
+
+  listenerEventsForm();
 }
 
 /**************************************** script principal**************************************** */
