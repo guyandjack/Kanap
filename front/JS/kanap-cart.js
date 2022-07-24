@@ -251,13 +251,26 @@ function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
     evt.target.style.border = "2px solid red";
 
     setTimeout(function(){
-      alert("Quantité minimum à 1");
+      alert("La quantité minimum acceptée est égale à : 1");
       evt.target.value = 1;
       evt.target.style.border = "2px solid transparent";},
      250);
     
     return 
   }
+
+  if (newqty > 100) {
+    evt.target.style.border = "2px solid red";
+
+    setTimeout(function () {
+      alert("La quantité maximale acceptée est égale à : 100");
+      evt.target.value = 100;
+      evt.target.style.border = "2px solid transparent";
+    }, 250);
+
+    return;
+  }
+  
   
   
 

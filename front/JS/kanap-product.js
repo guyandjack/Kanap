@@ -103,7 +103,22 @@ function displayDataProductById() {
  ****************************** script partie n° 2 : Validation du pannier et enregistrement dans le localstorage  *************
  *******************************************************************************************************************************/
 
+
+ /*** variable *** */
+ let inputQtyValid = false;
+ let inputColorValid = false;
+
 /****   declaration des fonctions ****/
+
+// Bloque la soumission du panier en desactivant le btn "ajouter au panier"
+function disabledButtonCart(){
+  buttonCart.setAttribute("disabled", "disabled");
+}
+
+// Autorise la soumission du panier en activant le btn "ajouter au panier"
+function enabledButtonCart(){
+  buttonCart.removeAttribute("disabled", "disabled");
+}
 
 //initialisation du panier
 function initCart() {
@@ -130,19 +145,74 @@ function getQuantity() {
 
 // Controle si la quantite entree par l' utilisateur est valide (positive)
 function validateQuantity(qty) {
-  let inputQty = document.querySelector("input[name='itemQuantity']");
 
-  if (qty < 1) {
-    alert("Veuillez entrer une quantite strictement superieur à 0");
-    inputQty.style.border = "2px solid red";
-    inputQty.focus();
+     
+     
+      let inputQty = document.querySelector("input[name='itemQuantity']");
 
-    return null;
-  }
+      if (qty < 1) {
 
-  inputQty.style.border = "2px solid transparent";
-  inputQty.blur();
-  return qty;
+        
+        inputQty.style.border = "2px solid red";
+       
+
+        setTimeout(function(){
+
+          alert("La quantité minimale acceptée est égale à : 1");
+          inputQty.value = 1;
+          inputQty.style.border = "2px solid transparent";
+          inputQtyValid = true;
+
+          if (inputColorValid) {
+            enabledButtonCart();
+          }
+          
+          
+        }, 250);
+        return false;
+      }
+      
+
+      
+
+      if (qty > 100) {
+      inputQty.style.border = "2px solid red";
+      
+       
+
+      setTimeout(function(){
+
+        alert("La quantité maximale acceptée est égale à : 100");
+        inputQty.value = 100;
+        inputQty.style.border = "2px solid transparent";
+        inputQtyValid = true;
+
+        if (inputColorValid) {
+          enabledButtonCart();
+        }
+        
+        
+      }, 250);
+      
+
+      return false;
+
+
+    }
+
+    inputQty.style.border = "2px solid transparent";
+    inputQtyValid = true;
+
+    if(inputColorValid){
+      enabledButtonCart();
+    }
+    
+    
+    return true;
+
+
+
+
 }
 
 // recupere la couleur defini par l' utilisateur
@@ -161,15 +231,25 @@ function validateColor(color) {
   for (option of arrayOfOptionColor) {
     if (color == option.innerText) {
       selectColor.style.border = "2px solid transparent";
-      selectColor.blur();
-      return color;
+      inputColorValid = true;
+
+      if(inputQtyValid){
+        enabledButtonCart();
+      }
+      
+      return true;
     }
   }
-  alert("veuillez selectionner une couleur dans la liste proposée");
   selectColor.style.border = "2px solid red";
-  selectColor.focus();
 
-  return null;
+  disabledButtonCart();
+  
+  setTimeout(function(){
+
+    alert("veuillez selectionner une couleur dans la liste proposée");
+    
+  },250);
+  return false;
 }
 
 //enregistre les données du panier dans le local storage
@@ -209,22 +289,24 @@ function pushToCart() {
   // recupère la qte  choisi par l' utilisateur
   let qty = getQuantity();
 
-  // controle si la quantite entree par l' utilisateur est valide
-  let validQty = validateQuantity(qty);
+  
 
-  if (validQty === null) {
-    return;
-  }
+  /*// controle si la quantite entree par l' utilisateur est valide
+  let validQty = validateQuantity(qty);
+  if(!validQty){
+
+    return
+  }*/
 
   // recupere la couleur choisi par l' utilisateur
   let color = getColor();
 
   // controle si une couleur valide a été selectionné par l' utilisateur
-  let validColor = validateColor(color);
+  /*let validColor = validateColor(color);
 
-  if (validColor === null) {
+  if (!validColor) {
     return;
-  }
+  }*/
 
   // recupere l' id du produit dans l 'url
   let productId = getIdProductFromUrl();
@@ -272,7 +354,8 @@ function listener(){
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
-  // Affiche dans la page product, le produit selctionné par l' utilisteur .
+  
+  disabledButtonCart();
 
   displayDataProductById();
 
