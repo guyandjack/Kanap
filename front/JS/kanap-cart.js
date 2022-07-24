@@ -13,13 +13,26 @@
 /*************** script partie N°1: permet l' affichage du panier client ***************************************
  **************************************************************************************************************/
 
-/******* constante globales    *****
+/******* variables et constantes    *****
  * *********************************/
 
 const sectionItems = document.getElementById("cart__items");
 
+let inputQtyValid = {
+  qtyValid : true
+ 
+
+};
+
+
+
+
+
 /**** declaration des fonctions *****
  * **********************************/
+
+//desactive le boutton "commander"
+
 
 //recuperation du panier dans le local storage
 function getCartFromLocalStorage() {
@@ -51,7 +64,6 @@ function createElementArticle(id, color) {
 //ceation de l' élément div conteneur et de l' image du produit
 
 function createElementDivContainerAndImg(elementArticle, urlImg) {
-
   let divContainerImg = document.createElement("div");
   divContainerImg.setAttribute("class", "cart__item__img");
   elementArticle.appendChild(divContainerImg);
@@ -135,10 +147,7 @@ function createElementDivContainerSetQty(
   divContainerSetQty.appendChild(inputSetQty);
 
   inputSetQty.addEventListener("change", function (evt) {
-    
     upDateCartIfQuantityChange(this.value, productId, productColor, evt);
-
-   
   });
 }
 
@@ -249,37 +258,43 @@ function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
   // Si la quantite entree par l' utilisateur est inferieur à 1 on stop la fonction et affiche message erreur
   if (newqty < 1) {
     evt.target.style.border = "2px solid red";
-
-    setTimeout(function(){
-      alert("La quantité minimum acceptée est égale à : 1");
-      evt.target.value = 1;
-      evt.target.style.border = "2px solid transparent";},
-     250);
+    inputQtyValid.qtyValid = false;
     
-    return 
-  }
-
-  if (newqty > 100) {
-    evt.target.style.border = "2px solid red";
 
     setTimeout(function () {
-      alert("La quantité maximale acceptée est égale à : 100");
-      evt.target.value = 100;
-      evt.target.style.border = "2px solid transparent";
+      alert("La quantité minimum acceptée est égale à : 1");
+      /*evt.target.value = 1;
+      
+      evt.target.style.border = "2px solid transparent";*/
     }, 250);
 
     return;
   }
-  
-  
-  
 
-  // recupere le panier du localstorage 
+  if (newqty > 100) {
+    evt.target.style.border = "2px solid red";
+    inputQtyValid = false;
+
+    setTimeout(function () {
+      alert("La quantité maximale acceptée est égale à : 100");
+
+      /*evt.target.value = 100;
+      
+      evt.target.style.border = "2px solid transparent";*/
+    }, 250);
+
+    return;
+  }
+
+  // recupere le panier du localstorage
   let cart = getCartFromLocalStorage();
 
   for (let item of cart) {
     if (item.id == productId && item.color == productColor) {
       item.qty = newqty;
+      inputQtyValid.qtyValid = true;
+      evt.target.style.border = "2px solid transparent";
+      
 
       // mise à jours du panier dans le local storage
 
@@ -312,7 +327,14 @@ function deleteItemFromCart(productId, productColor) {
   }
 
   // supression de l' item dans le DOM
-  let itemFromDom = document.querySelector("article[data-id='" + productId + "']" + "[data-color='" + productColor + "']" );
+  let itemFromDom = document.querySelector(
+    "article[data-id='" +
+      productId +
+      "']" +
+      "[data-color='" +
+      productColor +
+      "']"
+  );
   itemFromDom.remove();
 
   //mise à jour et affichage des totaux  prix et qte
@@ -320,13 +342,10 @@ function deleteItemFromCart(productId, productColor) {
 }
 
 // trie du tableau par id
-function sortCart(cart){
-  
-    cart.sort(function (a, b) {
-      return a.id.localeCompare(b.id);
-    });
-    
-  
+function sortCart(cart) {
+  cart.sort(function (a, b) {
+    return a.id.localeCompare(b.id);
+  });
 }
 
 // Fonction principale qui affiche les produits sur la page panier
@@ -335,12 +354,11 @@ function displayProductsInCart() {
   // récuperation du panier dans le local storage
   let cart = getCartFromLocalStorage();
   console.log(cart);
-  
+
   if (cart != null) {
     sortCart(cart);
     console.log(cart);
   }
-  
 
   // recuperation des infos produit , et affichage dans le DOM pour chaque produit du panier
 
@@ -444,6 +462,7 @@ const errorMsgEmpty = "Veuillez remplir le champs";
 // Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
 let tabCheckInput = {
+  
   firstName: null,
   lastName: null,
   address: null,
@@ -626,14 +645,16 @@ function validateForm(evt) {
 
   //verifie si le panier n'est pas vide
   let valid = isCartIsNotEmpty();
-  
+
   // si valid est different de true, le panier est vide, on sort de la fonction
   if (!valid) {
     return;
   }
 
-  
-
+  if (!inputQtyValid.qtyValid) {
+    
+    return;
+  }
 
   // Si les inputs du formulaire sont valides on procède à la requete fetch vers l'API
   if (
@@ -641,9 +662,8 @@ function validateForm(evt) {
     tabCheckInput.lastName &&
     tabCheckInput.address &&
     tabCheckInput.city &&
-    tabCheckInput.email
-    ) {
-
+    tabCheckInput.email 
+  ) {
     // objet contact à envoyer vers l' API
     let contact = {
       firstName: inputFirstName.value,
@@ -685,7 +705,6 @@ function validateForm(evt) {
     };
 
     fetch(apiUrl, setFetch)
-
       .then(function (res) {
         return res.json();
       })
@@ -698,11 +717,10 @@ function validateForm(evt) {
       .catch(function (err) {
         alert("il s'est produit une erreur: " + err);
       });
-    
   }
 
   // Autrement on relance un controle des inputs pour déterminer quelles sont celles qui sont en défaut
-  else{
+  else {
     // declenche les event des inputs
     const event = new Event("input");
     inputFirstName.dispatchEvent(event);
@@ -722,13 +740,10 @@ function validateForm(evt) {
       "Commande non envoyée, veuillez remplir correctement tous les champs du formulaire"
     );
   }
-  
 }
-
 
 // ecouteur d' évènement qui lance les fonctions de controle des inputs du formulaire et du panier
 function listenerEventsForm() {
-  
   inputFirstName.addEventListener("input", function () {
     validateInputFromForm(this.value, this.id);
   });
@@ -751,6 +766,8 @@ function listenerEventsForm() {
 // function globale pour l' execution du script principal
 
 function runKanapCart() {
+  
+
   displayProductsInCart();
 
   listenerEventsForm();
