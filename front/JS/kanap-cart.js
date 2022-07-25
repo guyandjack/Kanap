@@ -18,21 +18,12 @@
 
 const sectionItems = document.getElementById("cart__items");
 
-let inputQtyValid = {
-  qtyValid : true
- 
-
-};
-
-
-
-
+let inputQtyValidCart = true;
 
 /**** declaration des fonctions *****
  * **********************************/
 
 //desactive le boutton "commander"
-
 
 //recuperation du panier dans le local storage
 function getCartFromLocalStorage() {
@@ -255,32 +246,14 @@ function displayTotalPriceAndQuantity() {
 //fonction qui modifie le panier dans le local storage et affiche les nouveaux totaux si on modifie la quantite d' un produit
 
 function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
-  // Si la quantite entree par l' utilisateur est inferieur à 1 on stop la fonction et affiche message erreur
-  if (newqty < 1) {
+  // Si la quantite entree par l' utilisateur est inferieur à 1 ou superieur à 100 on stop la fonction et affiche message erreur
+
+  if (newqty > 100 || newqty < 1) {
     evt.target.style.border = "2px solid red";
-    inputQtyValid.qtyValid = false;
-    
+    inputQtyValidCart = false;
 
     setTimeout(function () {
-      alert("La quantité minimum acceptée est égale à : 1");
-      /*evt.target.value = 1;
-      
-      evt.target.style.border = "2px solid transparent";*/
-    }, 250);
-
-    return;
-  }
-
-  if (newqty > 100) {
-    evt.target.style.border = "2px solid red";
-    inputQtyValid = false;
-
-    setTimeout(function () {
-      alert("La quantité maximale acceptée est égale à : 100");
-
-      /*evt.target.value = 100;
-      
-      evt.target.style.border = "2px solid transparent";*/
+      alert("Veuillez entrer une quantité comprise entre 1 et 100 inclu");
     }, 250);
 
     return;
@@ -292,9 +265,8 @@ function upDateCartIfQuantityChange(newqty, productId, productColor, evt) {
   for (let item of cart) {
     if (item.id == productId && item.color == productColor) {
       item.qty = newqty;
-      inputQtyValid.qtyValid = true;
+      inputQtyValidCart = true;
       evt.target.style.border = "2px solid transparent";
-      
 
       // mise à jours du panier dans le local storage
 
@@ -462,7 +434,6 @@ const errorMsgEmpty = "Veuillez remplir le champs";
 // Objet litteral indiquant si le contenu des inputs du formulaire est valide
 
 let tabCheckInput = {
-  
   firstName: null,
   lastName: null,
   address: null,
@@ -651,8 +622,7 @@ function validateForm(evt) {
     return;
   }
 
-  if (!inputQtyValid.qtyValid) {
-    
+  if (!inputQtyValidCart) {
     return;
   }
 
@@ -662,7 +632,7 @@ function validateForm(evt) {
     tabCheckInput.lastName &&
     tabCheckInput.address &&
     tabCheckInput.city &&
-    tabCheckInput.email 
+    tabCheckInput.email
   ) {
     // objet contact à envoyer vers l' API
     let contact = {
@@ -766,8 +736,6 @@ function listenerEventsForm() {
 // function globale pour l' execution du script principal
 
 function runKanapCart() {
-  
-
   displayProductsInCart();
 
   listenerEventsForm();

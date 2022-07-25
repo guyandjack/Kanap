@@ -117,7 +117,7 @@ function disabledButtonCart(){
 
 // Autorise la soumission du panier en activant le btn "ajouter au panier"
 function enabledButtonCart(){
-  buttonCart.removeAttribute("disabled", "disabled");
+  buttonCart.removeAttribute("disabled");
 }
 
 //initialisation du panier
@@ -143,6 +143,21 @@ function getQuantity() {
   return qtyProductsValue;
 }
 
+//modifi la variable de controle dès une modification de la quantité
+function flagQty(qty){
+  if(qty > 100 || qty < 1){
+    inputQtyValid = false;
+    disabledButtonCart();
+    console.log(inputQtyValid)
+    return
+  }
+  inputQtyValid = true;
+  if(inputColorValid){
+    enabledButtonCart();
+  }
+  console.log(inputQtyValid);
+}
+
 // Controle si la quantite entree par l' utilisateur est valide (positive)
 function validateQuantity(qty) {
 
@@ -150,55 +165,21 @@ function validateQuantity(qty) {
      
       let inputQty = document.querySelector("input[name='itemQuantity']");
 
-      if (qty < 1) {
-
+      if (qty > 100 || qty < 1) {
+      
+          inputQty.style.border = "2px solid red";
+          inputQtyValid = false;
+          disabledButtonCart();
         
-        inputQty.style.border = "2px solid red";
-       
+          setTimeout(function(){
 
-        setTimeout(function(){
-
-          alert("La quantité minimale acceptée est égale à : 1");
-          inputQty.value = 1;
-          inputQty.style.border = "2px solid transparent";
-          inputQtyValid = true;
-
-          if (inputColorValid) {
-            enabledButtonCart();
-          }
+          alert("Veuillez entrer une quantité comprise entre 1 et 100 inclu");
           
+                  
           
         }, 250);
-        return false;
+        return
       }
-      
-
-      
-
-      if (qty > 100) {
-      inputQty.style.border = "2px solid red";
-      
-       
-
-      setTimeout(function(){
-
-        alert("La quantité maximale acceptée est égale à : 100");
-        inputQty.value = 100;
-        inputQty.style.border = "2px solid transparent";
-        inputQtyValid = true;
-
-        if (inputColorValid) {
-          enabledButtonCart();
-        }
-        
-        
-      }, 250);
-      
-
-      return false;
-
-
-    }
 
     inputQty.style.border = "2px solid transparent";
     inputQtyValid = true;
@@ -206,13 +187,7 @@ function validateQuantity(qty) {
     if(inputColorValid){
       enabledButtonCart();
     }
-    
-    
-    return true;
-
-
-
-
+ 
 }
 
 // recupere la couleur defini par l' utilisateur
@@ -237,10 +212,11 @@ function validateColor(color) {
         enabledButtonCart();
       }
       
-      return true;
+      return 
     }
   }
   selectColor.style.border = "2px solid red";
+  inputColorValid = false;
 
   disabledButtonCart();
   
@@ -249,7 +225,7 @@ function validateColor(color) {
     alert("veuillez selectionner une couleur dans la liste proposée");
     
   },250);
-  return false;
+  return ;
 }
 
 //enregistre les données du panier dans le local storage
@@ -347,19 +323,40 @@ function listener(){
 
   inputSetColor.addEventListener("change", function(){validateColor(this.value)});
   inputSetQty.addEventListener("change", function(){validateQuantity(this.value)});
+  inputSetQty.addEventListener("input", function(){flagQty(this.value)});
   buttonCart.addEventListener("click", pushToCart);
+}
+
+// controle les inputs utilisateur à l'ouverture de la page
+function firstCheckInput(){
+  let inputColor = document.getElementById("colors");
+  inputColor.style.border = "2px solid red";
+  let inputQty = document.getElementById("quantity");
+  inputQty.style.border = "2px solid red";
+
+  setTimeout(function(){
+    alert("Veuillez entre une quantité et une couleur de votre choix, avant ajouter l' article au panier");
+  }, 1500);
+
 }
 
 
 // fonction globale pour l' execution du script principal
 
 function runKanapProduct() {
+
+   
   
   disabledButtonCart();
 
   displayDataProductById();
 
   listener();
+
+  firstCheckInput();
+
+  
+  
 
 }
 
